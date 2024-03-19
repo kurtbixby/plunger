@@ -1,6 +1,0 @@
-@Plunger_Web_API_HostAddress = http://localhost:5235
-
-GET {{Plunger_Web_API_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
