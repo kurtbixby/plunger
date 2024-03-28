@@ -1,5 +1,4 @@
-
-namespace Plunger.DbFiller;
+namespace Plunger.Common;
 
 public class Utils
 {

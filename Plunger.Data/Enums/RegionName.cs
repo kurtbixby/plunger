@@ -2,6 +2,7 @@ namespace Plunger.Data.Enums;
 
 public enum RegionName
 {
+    Unknown = 0,
     Europe = 1,
     NorthAmerica = 2,
     Australia = 3,

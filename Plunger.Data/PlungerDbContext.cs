@@ -3,9 +3,11 @@ using Plunger.Data.DbModels;
 
 namespace Plunger.Data;
 
-public class PlungerDb : DbContext
+public class PlungerDbContext : DbContext
 {
-    public PlungerDb(DbContextOptions<PlungerDb> options) : base(options) { }
+    public PlungerDbContext(DbContextOptions<PlungerDbContext> options) : base(options)
+    {
+    }
     
     public DbSet<User> Users { get; set; }
     public DbSet<GameList> GameLists { get; set; }
@@ -18,6 +20,13 @@ public class PlungerDb : DbContext
     public DbSet<Platform> Platforms { get; set; }
     public DbSet<Region> Regions { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseNpgsql("Host=localhost;Database=plunger-db-local;Username=localuser;Password=localuserpassword");
+    // protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    //     => optionsBuilder.UseNpgsql(_connectionString);
+    
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Game>()
+            .HasMany(e => e.Platforms)
+            .WithMany();
+    }
 }

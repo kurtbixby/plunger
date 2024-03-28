@@ -6,6 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Plunger.WebAPI", "Plunger.W
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Plunger.DbFiller", "Plunger.DbFiller\Plunger.DbFiller.csproj", "{4F1E459F-A53A-4315-AF70-CD3434847711}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Plunger.Common", "Plunger.Common\Plunger.Common.csproj", "{080F2527-4F30-45A5-ADD4-0AE023A5F5B8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{4F1E459F-A53A-4315-AF70-CD3434847711}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4F1E459F-A53A-4315-AF70-CD3434847711}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4F1E459F-A53A-4315-AF70-CD3434847711}.Release|Any CPU.Build.0 = Release|Any CPU
+		{080F2527-4F30-45A5-ADD4-0AE023A5F5B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{080F2527-4F30-45A5-ADD4-0AE023A5F5B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{080F2527-4F30-45A5-ADD4-0AE023A5F5B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{080F2527-4F30-45A5-ADD4-0AE023A5F5B8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
