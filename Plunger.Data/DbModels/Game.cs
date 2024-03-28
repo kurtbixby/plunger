@@ -10,6 +10,7 @@ public class Game
     public DateTimeOffset FirstReleased { get; set; }
     public List<Platform> Platforms { get; set; }
     public List<ReleaseDate> ReleaseDates { get; set; }
+    public Cover? Cover { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
     public Guid Checksum { get; set; }
 }

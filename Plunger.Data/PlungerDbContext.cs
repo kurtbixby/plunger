@@ -17,6 +17,7 @@ public class PlungerDbContext : DbContext
     public DbSet<Collection> Collections { get; set; }
     public DbSet<CollectionGame> CollectionGames { get; set; }
     public DbSet<Game> Games { get; set; }
+    public DbSet<Cover> Covers { get; set; }
     public DbSet<Platform> Platforms { get; set; }
     public DbSet<Region> Regions { get; set; }
 

@@ -27,7 +27,8 @@ public class Program
         // LoadPlatforms(igdbConnector, contextOptions).Wait();
         // Load Regions
         // Load Games
-        LoadGames(igdbConnector, contextOptions, new DateTimeOffset(2024, 1, 1, 0, 0, 0, TimeSpan.Zero), 1000).Wait();
+        // LoadGames(igdbConnector, contextOptions, new DateTimeOffset(2024, 1, 1, 0, 0, 0, TimeSpan.Zero), 1000).Wait();
+        LoadCovers(igdbConnector, contextOptions, new DateTimeOffset(2024, 1, 1, 0, 0, 0, TimeSpan.Zero), 0).Wait();
     }
 
     private static async Task LoadPlatforms(IgdbConnector igdbConnector, DbContextOptions<PlungerDbContext> dbContextOptions)
@@ -60,6 +61,27 @@ public class Program
             offset += gamesRetrieved;
             Console.WriteLine($"New offset is {offset}");
         } while (gamesRetrieved >= 500);
+    }
+    
+    private static async Task LoadCovers(IgdbConnector igdbConnector, DbContextOptions<PlungerDbContext> dbContextOptions, DateTimeOffset cutoffTime, int offset = 0)
+    {
+        var retrieved = 0;
+        do
+        {
+            await using var db = new PlungerDbContext(dbContextOptions);
+
+            var unixTimeCutoff = cutoffTime.ToUnixTimeSeconds();
+            // Load Games
+            Console.WriteLine($"Querying at offset {offset}");
+            var apiObjects = await igdbConnector.GetCovers($"where game.updated_at < {unixTimeCutoff}; offset {offset}; sort game.id asc;");
+            retrieved = apiObjects.Count;
+            Console.WriteLine($"{retrieved} covers retrieved at offset {offset}");
+            db.Covers.AddRange(apiObjects.Select(e => e.ToDbModel(db)));
+            var res = await db.SaveChangesAsync();
+            Console.WriteLine($"{res} rows inserted");
+            offset += retrieved;
+            Console.WriteLine($"New offset is {offset}");
+        } while (retrieved >= 500);
     }
 
     private static async Task LoadRegions()

@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Plunger.Data.DbModels;
 
 namespace Plunger.Data.IgdbAPIModels;
 

@@ -25,6 +25,26 @@ public static class GameExtensions
     }
 }
 
+public static class CoverExtensions
+{
+    public static Data.DbModels.Cover ToDbModel(this Data.IgdbAPIModels.Cover cover, PlungerDbContext dbContext)
+    {
+        try
+        {
+            if (cover.ImageId == null)
+            {
+                throw new Exception();
+            }
+            return new Data.DbModels.Cover { Id = cover.Id, GameId = cover.Game, ImageId = cover.ImageId, Url = cover.Url, Height = cover.Height, Width = cover.Width, Checksum = cover.Checksum };
+        }
+        catch (Exception e)
+        {
+            return null;
+        }
+        
+    }
+}
+
 public static class DateFormatExtensions
 {
     public static Enums.DateFormat ToCommonEnum(this Data.IgdbAPIModels.DateFormat format) =>
