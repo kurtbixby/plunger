@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Plunger.Data;
@@ -11,9 +12,11 @@ using Plunger.Data;
 namespace Plunger.Data.Migrations
 {
     [DbContext(typeof(PlungerDbContext))]
-    partial class PlungerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240501192419_EndOfApiChanges")]
+    partial class EndOfApiChanges
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -82,14 +85,8 @@ namespace Plunger.Data.Migrations
                     b.Property<int>("RegionId")
                         .HasColumnType("integer");
 
-                    b.Property<DateTimeOffset?>("TimeAcquired")
+                    b.Property<DateTimeOffset>("TimeAcquired")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTimeOffset>("TimeAdded")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("VersionId")
-                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
