@@ -12,6 +12,17 @@ Track list of games I want to play
         If I finish on one list, it's finished everywhere
         
 
+TESTING
+    Game Status Test 1 
+        * Add game
+        * Retrieve game
+        * Update game
+        * Delete game
+        * Retrieve no game
+
+    Game List Tests
+    Game Collection Tests
+
 FUTURE
     Let people follow, copy, & share lists
     DEPENDENCIES
