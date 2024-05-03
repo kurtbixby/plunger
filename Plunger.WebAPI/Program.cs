@@ -1,8 +1,11 @@
+using System.Text.Json;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Plunger.Common;
 using Plunger.Data;
 using Plunger.Data.DbModels;
+using Plunger.WebApi;
 using Plunger.WebApi.DtoModels;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,64 +16,300 @@ var app = builder.Build();
 
 app.MapGet("/", () => "Hello World!");
 
-app.MapGet("/users/{userid}/lists", async ([FromRoute] int userId, PlungerDbContext db) => await db.GameLists.Where(gl => gl.UserId == userId).ToListAsync());
-app.MapGet("/users/{userid}/collection", async ([FromRoute] int userId, PlungerDbContext db) => await db.Collections.Where(collection => collection.UserId == userId).ToListAsync());
+app.MapGet("/games/{gameid}", async ([FromRoute] int gameId, [FromServices] PlungerDbContext db) =>
+{
+    return await db.Games.Where(g => g.Id == gameId).Include(g => g.Platforms).Include(g => g.ReleaseDates).ToListAsync();
+});
+
+#warning TODO: Add pagination to results
+app.MapGet("/users/{userid}/lists", async ([FromRoute] int userId, [FromServices] PlungerDbContext db) => await db.GameLists.Where(gl => gl.UserId == userId).ToListAsync());
+
+app.MapGet("/users/{userid}/collection", async ([FromRoute] int userId, [FromServices] PlungerDbContext db) => await db.Collections.Where(collection => collection.UserId == userId).ToListAsync());
+
+app.MapPost("/users/{userid}/collection", async ([FromRoute] int userId, [FromServices] PlungerDbContext db, [FromBody] CollectionAddGameRequest req) =>
+{
+    var validRes = req.Validate();
+
+    if (!validRes.IsValid)
+    {
+        return Results.BadRequest(validRes.ValidationErrors);
+    }
+
+    try
+    {
+        var collection = await db.Collections.SingleAsync(c => c.UserId == userId);
+
+        var collectionGame = new CollectionGame()
+        {
+            Collection = collection, GameId = req.GameId, PlatformId = req.PlatformId, RegionId = req.RegionId,
+            Region = req.Region, TimeAcquired = req.TimeAcquired, Physicality = req.Physicality
+        };
+
+        await db.CollectionGames.AddAsync(collectionGame);
+        await db.SaveChangesAsync();
+
+        return Results.Ok(new
+        {
+            collectionGame.Id, collectionGame.GameId, collectionGame.PlatformId, collectionGame.RegionId,
+            collectionGame.TimeAcquired, collectionGame.Physicality
+        });
+    }
+    catch (InvalidOperationException e)
+    {
+        return Results.Problem();
+    }
+});
+
+app.MapPatch("/users/{userid}/collection/{itemid}", async ([FromRoute] int userId, [FromRoute] int itemId, [FromServices] PlungerDbContext db, [FromBody] CollectionGamePatchRequest req) =>
+{
+    var validRes = req.Validate();
+
+    if (!validRes.IsValid)
+    {
+        return Results.BadRequest(validRes.ValidationErrors);
+    }
+
+    try
+    {
+        var item = await db.CollectionGames.SingleAsync(cg => cg.Id == itemId);
+
+        if (item.VersionId.CompareTo(req.VersionId) != 0)
+        {
+            return Results.BadRequest(new { Message = "Incorrect VersionId" });
+        }
+
+        item.TimeAcquired = req.TimeAcquired ?? item.TimeAcquired;
+        item.Physicality = req.Physicality ?? item.Physicality;
+        if (req.GameId != null)
+        {
+            var game = await db.Games.FindAsync(req.GameId);
+            item.GameId = game == null ? (int)req.GameId : item.GameId;
+        }
+        if (req.PlatformId != null)
+        {
+            var game = await db.Platforms.FindAsync(req.PlatformId);
+            item.PlatformId = game == null ? (int)req.PlatformId : item.PlatformId;
+        }
+        if (req.RegionId != null)
+        {
+            var region = await db.Regions.FindAsync(req.RegionId);
+            item.RegionId = region == null ? (int)req.RegionId : item.RegionId;
+        }
+        item.VersionId = new Guid();
+
+        await db.SaveChangesAsync();
+        
+        return Results.Ok(item);
+    }
+    catch (InvalidOperationException e)
+    {
+        Console.WriteLine(e);
+        return Results.Problem();
+    }
+});
+
+app.MapDelete("/users/{userid}/collection/{itemid}",
+    async ([FromRoute] int userId, [FromRoute] int itemId, [FromServices] PlungerDbContext db) =>
+    {
+        var item = await db.CollectionGames.FindAsync(itemId);
+        if (item == null)
+        {
+            return Results.BadRequest("Invalid itemid");
+        }
+        db.CollectionGames.Remove(item);
+        await db.SaveChangesAsync();
+
+        return Results.Ok();
+    });
 // app.MapGet("/users/{userid}/nowPlaying", async ([FromRoute] int userId, PlungerDb db) => await );
 // app.MapGet("/users/{userid}/playHistory", async ([FromRoute] int userId, PlungerDb db) => await db.);
 
-app.MapGet("/lists/{listid}", async ([FromRoute] int listId, PlungerDbContext db) => await db.GameLists.Where(list => list.Id == listId).ToListAsync());
+app.MapPost("/lists/", async ([FromBody] NewListRequest req, [FromServices] PlungerDbContext db) =>
+{
+    var validation = req.Validate();
+
+    if (!validation.IsValid)
+    {
+        return Results.BadRequest(validation.ValidationErrors);
+    }
+    
+    #warning TODO: IMPLEMENT REAL USER LOGIC
+    var userId = 1;
+    
+    // Checks for entries that reference a valid, existing game
+    var entryIds = req.Entries.Select(e => e.GameId);
+    var validGameIds = db.Games.Where(e => entryIds.Contains(e.Id)).Select(e => e.Id);
+    var entries = req.Entries.Where(e => validGameIds.Contains(e.GameId)).Select(e => new GameListEntry() { Number = e.Number, GameId = e.GameId });
+    var gameListEntries = req.Unordered ? entries.ToList() : entries.OrderBy(e => e.Number).ToList();
+    
+    var list = new GameList() { Name = req.Name, Unordered = req.Unordered, UserId = userId, GameListEntries = gameListEntries.ToList() };
+    await db.GameLists.AddRangeAsync(list);
+    var res = await db.SaveChangesAsync();
+
+    return Results.Json(new {Id = list.Id, Name = list.Name});
+});
+
+app.MapGet("/lists/{listId}", async ([FromRoute] int listId, [FromServices] PlungerDbContext db) => await db.GameLists.Where(list => list.Id == listId).ToListAsync());
+
+app.MapPatch("/lists/{listId}", async ([FromBody] ListUpdateRequest request, [FromServices] PlungerDbContext dbContext, [FromRoute] int listId) =>
+{
+    var validation = request.Validate();
+    if (!validation.IsValid)
+    {
+        return Results.BadRequest(validation.ValidationErrors);
+    }
+
+    var fetchList = await dbContext.GameLists.Include(e => e.GameListEntries).Where(e => e.Id == listId).ToListAsync();
+    if (fetchList.Count == 0)
+    {
+        return Results.NotFound(new { Message = "List not found" });
+    }
+
+    var list = fetchList[0];
+
+    if (request.VersionId.CompareTo(list.VersionId) != 0)
+    {
+        return Results.BadRequest(new { Message = "Invalid version of the list" });
+    }
+    
+    var error = false;
+    request.Updates.ForEach((e) =>
+    {
+        if (!error)
+        {
+            switch (e.Action)
+            {
+                case ListUpdateRequest.ListUpdateAction.ChangeName:
+                    list.Name = e.Payload;
+                    break;
+                case ListUpdateRequest.ListUpdateAction.ChangeOrdered:
+                    list.Unordered = Convert.ToBoolean(e.Payload);
+                    break;
+                case ListUpdateRequest.ListUpdateAction.AddGame:
+                    var gameId = Convert.ToInt32(e.Payload);
+
+                    var listEntry = new GameListEntry()
+                        { GameId = gameId, GameList = list, Number = list.GameListEntries.Count };
+                    list.GameListEntries.Add(listEntry);
+                    break;
+                case ListUpdateRequest.ListUpdateAction.RemoveGame:
+                    var gameNumber = Convert.ToInt32(e.Payload);
+                    if (list.GameListEntries.Count <= gameNumber)
+                    {
+                        error = error || true;
+                        break;
+                    }
+                    list.GameListEntries.RemoveAt(gameNumber);
+                    break;
+                case ListUpdateRequest.ListUpdateAction.MoveGame:
+                    var moveAction = JsonSerializer.Deserialize<ListActionMoveGame>(e.Payload);
+
+                    if (list.GameListEntries.Count <= moveAction.SourceNumber)
+                    {
+                        error = error || true;
+                        break;
+                    }
+
+                    if (list.GameListEntries[moveAction.SourceNumber].GameId != moveAction.GameId)
+                    {
+                        error = error || true;
+                        break;
+                    }
+
+                    var entry = list.GameListEntries[moveAction.SourceNumber];
+                    list.GameListEntries.RemoveAt(moveAction.SourceNumber);
+                    list.GameListEntries.Insert(moveAction.DestinationNumber, entry);
+                    break;
+            }
+        }
+    });
+    if (error)
+    {
+        return Results.BadRequest(new { Message = "Error processing updates list"});
+    }
+
+    list.VersionId = new Guid();
+    await dbContext.SaveChangesAsync();
+    
+    return Results.Ok(new { });
+});
 
 #warning TODO: ImplementAuthentication & Authorization
-app.MapPost("/users/{userid}/games/", async (PlungerDbContext dbContext, [FromRoute] int userId, NewGameStatusDto newGameReq) =>
+app.MapPost("/users/{userid}/games/", async ([FromServices] PlungerDbContext dbContext, [FromRoute] int userId, [FromBody] NewGameStatusDto newGameReq) =>
 {
     #warning TODO: Check for valid userid
+    var user = await dbContext.Users.FindAsync(userId);
+    if (user == null)
+    {
+        // invalid user
+        return Results.BadRequest(new {Message = "Invalid user"});
+    }
     #warning TODO: Check for valid game
-    var gameId = newGameReq.GameId;
+    var game = await dbContext.Games.FindAsync(newGameReq.GameId);
+    if (game == null)
+    {
+        // invalid game
+        return Results.BadRequest(new {Message = "Invalid game"});
+    }
     
-    var completed = newGameReq.Completed.HasValue ? newGameReq.Completed.Value : false;
+    var gameId = newGameReq.GameId;
+    var completed = newGameReq.Completed ?? false;
     
     if (!newGameReq.PlayState.HasValue)
     {
-        #warning TODO: Add logic for invalid playstate 
+        #warning TODO: Add logic for invalid playstate
+        return Results.BadRequest();
     }
-    var status = new GameStatus() { UserId = userId,  GameId = gameId, Completed = completed, PlayState = (int)newGameReq.PlayState.Value };
-    dbContext.GameStatuses.Add(status);
-    return dbContext.SaveChangesAsync();
-});
-
-app.MapGet("/users/{userid}/games/{gameid}", async (PlungerDbContext dbContext, [FromRoute] int userId, [FromRoute] int gameId) =>
-{
-    return dbContext.GameStatuses.Where(e => e.UserId == userId && e.GameId == gameId).OrderByDescending(e => e.Id);
-});
-app.MapPatch("/users/{userid}/games/{gameid}",
-    async (PlungerDbContext dbContext, [FromRoute] int userId, [FromRoute] int gameId, UpdateGameStatusDto updateGameReq) =>
+    var status = new GameStatus() { UserId = userId,  GameId = gameId, Completed = completed, PlayState = (int)newGameReq.PlayState.Value, UpdatedAt = newGameReq.TimeStamp };
+    var stateChange = new PlayStateChange() { UpdatedAt = newGameReq.TimeStamp, NewState = (int)newGameReq.PlayState.Value};
+    var res = dbContext.GameStatuses.Add(status);
+    await dbContext.SaveChangesAsync();
+    
+    return Results.Ok(new GameStatusResponse()
     {
-        var status = await dbContext.GameStatuses.FirstAsync(e => e.UserId == userId && e.GameId == gameId);
-        if (updateGameReq.TimeStamp < status.UpdatedAt)
-        {
-            #warning TODO: Handle invalid status update
-        }
-
-        status.PlayState = (int)updateGameReq.PlayState;
-        status.UpdatedAt = updateGameReq.TimeStamp;
-        var newStateChange = new PlayStateChange()
-            { UpdatedAt = updateGameReq.TimeStamp, NewState = (int)updateGameReq.PlayState, GameStatusId = status.Id };
-        await dbContext.PlayStateChanges.AddAsync(newStateChange);
-        return await dbContext.SaveChangesAsync();
+        Id = status.Id, UserId = status.UserId, Completed = status.Completed, PlayState = status.PlayState,
+        UpdatedAt = status.UpdatedAt, Name = status.Game.Name, ShortName = status.Game.ShortName
     });
+});
 
-app.MapPost("/users/", async (PlungerDbContext dbContext, NewUserRequest newUserReq) =>
+app.MapGet("/users/{userId}/games/{gameId}", ([FromServices] PlungerDbContext dbContext, [FromRoute] int userId, [FromRoute] int gameId) =>
+{
+    return dbContext.GameStatuses.Where(e => e.UserId == userId && e.GameId == gameId).OrderByDescending(e => e.UpdatedAt).Select(e => new {Id = e.Id, GameId = e.GameId, UserId = e.UserId, Completed = e.Completed, PlayState = e.PlayState, UpdatedAt = e.UpdatedAt, PlayStateChanges = e.PlayStateChanges});
+});
+
+app.MapPatch("/users/{userId}/games/{gameId}",
+    async ([FromServices] PlungerDbContext dbContext, [FromRoute] int userId, [FromRoute] int gameId, [FromBody] UpdateGameStatusDto updateGameReq) =>
+{
+    var status = await dbContext.GameStatuses.Include(e => e.Game).FirstAsync(e => e.UserId == userId && e.GameId == gameId);
+    if (updateGameReq.TimeStamp < status.UpdatedAt)
+    {
+        return Results.BadRequest(new { Message = "Time stamp older than current time stamp" });
+    }
+
+    status.PlayState = (int)updateGameReq.PlayState;
+    status.UpdatedAt = updateGameReq.TimeStamp;
+    var newStateChange = new PlayStateChange()
+        { UpdatedAt = updateGameReq.TimeStamp, NewState = (int)updateGameReq.PlayState, GameStatusId = status.Id };
+    await dbContext.PlayStateChanges.AddAsync(newStateChange);
+    await dbContext.SaveChangesAsync();
+    
+    return Results.Ok(new GameStatusResponse()
+    {
+        Id = status.Id, UserId = status.UserId, Completed = status.Completed, PlayState = status.PlayState,
+        UpdatedAt = status.UpdatedAt, Name = status.Game.Name, ShortName = status.Game.ShortName
+    });
+});
+
+app.MapPost("/users/", async ([FromServices] PlungerDbContext dbContext, [FromBody] NewUserRequest newUserReq) =>
 {
     #warning TODO: Validate username & password format
-    var response = new NewUserResponse() { Messages = new Dictionary<string, string>()};
     
     var validationRes = newUserReq.Validate();
     if (!validationRes.IsValid)
     {
         // early return
         // invalid request
-        response.Messages = validationRes.ValidationErrors;
-        return response;
+        return Results.BadRequest(validationRes.ValidationErrors);
     }
     
     #warning TODO: Skip this logic that is invalid for bad requests
@@ -79,55 +318,45 @@ app.MapPost("/users/", async (PlungerDbContext dbContext, NewUserRequest newUser
     if (existingUser)
     {
         // invalid request
-        response.Messages["username"] = "user already exists";
-        return response;
+        return Results.BadRequest(new { Message = "user already exists" });
     }
     var pwHash = Utils.ComputePasswordHash(newUserReq.Password);
 
     var newUser = new User() { Username = newUserReq.Username, Password = pwHash, Email = newUserReq.Email };
-    var res = await dbContext.Users.AddAsync(newUser);
+    var userRes = await dbContext.Users.AddAsync(newUser);
+    var collectionRes = await dbContext.Collections.AddAsync(new Collection() { User = newUser });
     await dbContext.SaveChangesAsync();
 
-    response.Messages["success"] = $"created user with id {res.Entity.Id}";
-    return response;
+    return Results.Ok(new
+        { Success = $"created user with id {userRes.Entity.Id}", Debug = $"collection id: {collectionRes.Entity.Id}" });
 });
 
-app.MapPost("/users/login/", async (PlungerDbContext dbContext, LoginRequest loginRequest) =>
+app.MapPost("/users/login/", async ([FromServices] PlungerDbContext dbContext, [FromBody] LoginRequest loginRequest) =>
 {
     var validationRes = loginRequest.Validate();
     if (!validationRes.IsValid)
     {
         // early return
         // invalid request
-        response.Messages = validationRes.ValidationErrors;
-        return response;
+        return Results.BadRequest(new NewUserResponse() { Messages = validationRes.ValidationErrors });
     }
     
     var userExists = await dbContext.Users.AnyAsync(e =>
         String.Equals(e.Email, loginRequest.Identity) || string.Equals(e.Username, loginRequest.Identity));
 
-    var success = false;
     if (!userExists)
     {
         // no user;
-        return new LoginResponse() { Login = success };
+        return Results.BadRequest(new { Message = "invalid credentials" });
     }
 
-    var user = new User();
-    if (loginRequest.Identity.Contains('@'))
-    {
-        // is email
-        user = await dbContext.Users.FirstAsync(e => String.Equals(e.Email, loginRequest.Identity));
-    }
-    else
-    {
-        // is username
-        user = await dbContext.Users.FirstAsync(e => String.Equals(e.Username, loginRequest.Identity));
-    }
+    var user = loginRequest.Identity.Contains('@')
+        ? await dbContext.Users.FirstAsync(e => String.Equals(e.Email, loginRequest.Identity))
+        : await dbContext.Users.FirstAsync(e => String.Equals(e.Username, loginRequest.Identity));
 
     // Compare password
-    success = Utils.CheckPassword(loginRequest.Password, user.Password);
-    return new LoginResponse() { Login = success };
+    var success = Utils.CheckPassword(loginRequest.Password, user.Password);
+    return Results.Ok(new LoginResponse() { Login = success });
 });
 
 app.Run();

@@ -5,6 +5,6 @@ namespace Plunger.WebApi.DtoModels;
 
 public record UpdateGameStatusDto()
 {
-    [JsonPropertyName("timestamp")] public DateTimeOffset TimeStamp;
-    [JsonPropertyName("playstate")] public PlayState PlayState;
+    [JsonPropertyName("timestamp")] public DateTimeOffset TimeStamp { get; init; }
+    [JsonPropertyName("playstate")] public PlayState PlayState { get; init; }
 };
