@@ -24,7 +24,14 @@ app.MapGet("/games/{gameid}", async ([FromRoute] int gameId, [FromServices] Plun
 #warning TODO: Add pagination to results
 app.MapGet("/users/{userid}/lists", async ([FromRoute] int userId, [FromServices] PlungerDbContext db) => await db.GameLists.Where(gl => gl.UserId == userId).ToListAsync());
 
-app.MapGet("/users/{userid}/collection", async ([FromRoute] int userId, [FromServices] PlungerDbContext db) => await db.Collections.Where(collection => collection.UserId == userId).ToListAsync());
+app.MapGet("/users/{userid}/collection", async ([FromRoute] int userId, [FromServices] PlungerDbContext db) => await db.Collections.Select(
+    c => new
+    {
+        c.Id, c.UserId, Games = c.Games.Select(g => new
+        {
+            g.Id, g.TimeAdded, g.TimeAcquired, g.Physicality, g.GameId, g.PlatformId, g.RegionId, g.VersionId
+        })
+    }).Where(collection => collection.UserId == userId).ToListAsync());
 
 app.MapPost("/users/{userid}/collection", async ([FromRoute] int userId, [FromServices] PlungerDbContext db, [FromBody] CollectionAddGameRequest req) =>
 {
@@ -41,8 +48,8 @@ app.MapPost("/users/{userid}/collection", async ([FromRoute] int userId, [FromSe
 
         var collectionGame = new CollectionGame()
         {
-            Collection = collection, GameId = req.GameId, PlatformId = req.PlatformId, RegionId = req.RegionId,
-            Region = req.Region, TimeAcquired = req.TimeAcquired, Physicality = req.Physicality
+            Collection = collection, GameId = req.GameId, PlatformId = req.PlatformId, RegionId = (int)req.Region,
+            Region = req.Region, TimeAdded = DateTimeOffset.UtcNow, TimeAcquired = req.TimeAcquired, Physicality = req.Physicality, VersionId = Guid.NewGuid()
         };
 
         await db.CollectionGames.AddAsync(collectionGame);
@@ -51,7 +58,7 @@ app.MapPost("/users/{userid}/collection", async ([FromRoute] int userId, [FromSe
         return Results.Ok(new
         {
             collectionGame.Id, collectionGame.GameId, collectionGame.PlatformId, collectionGame.RegionId,
-            collectionGame.TimeAcquired, collectionGame.Physicality
+            collectionGame.TimeAdded, collectionGame.TimeAcquired, collectionGame.Physicality, collectionGame.VersionId
         });
     }
     catch (InvalidOperationException e)
@@ -87,15 +94,17 @@ app.MapPatch("/users/{userid}/collection/{itemid}", async ([FromRoute] int userI
         }
         if (req.PlatformId != null)
         {
-            var game = await db.Platforms.FindAsync(req.PlatformId);
-            item.PlatformId = game == null ? (int)req.PlatformId : item.PlatformId;
+            #warning TODO: Check that PlatformID is valid for the game
+            var platform = await db.Platforms.FindAsync(req.PlatformId);
+            item.PlatformId = platform == null ? (int)req.PlatformId : item.PlatformId;
         }
         if (req.RegionId != null)
         {
+            #warning TODO: Check that RegionID is valid for the game
             var region = await db.Regions.FindAsync(req.RegionId);
             item.RegionId = region == null ? (int)req.RegionId : item.RegionId;
         }
-        item.VersionId = new Guid();
+        item.VersionId = Guid.NewGuid();
 
         await db.SaveChangesAsync();
         
@@ -228,13 +237,14 @@ app.MapPatch("/lists/{listId}", async ([FromBody] ListUpdateRequest request, [Fr
         return Results.BadRequest(new { Message = "Error processing updates list"});
     }
 
-    list.VersionId = new Guid();
+    list.VersionId = Guid.NewGuid();
     await dbContext.SaveChangesAsync();
     
     return Results.Ok(new { });
 });
 
 #warning TODO: ImplementAuthentication & Authorization
+#warning TODO: Handle multiple "create" requests for the same game
 app.MapPost("/users/{userid}/games/", async ([FromServices] PlungerDbContext dbContext, [FromRoute] int userId, [FromBody] NewGameStatusDto newGameReq) =>
 {
     #warning TODO: Check for valid userid
@@ -251,6 +261,12 @@ app.MapPost("/users/{userid}/games/", async ([FromServices] PlungerDbContext dbC
         // invalid game
         return Results.BadRequest(new {Message = "Invalid game"});
     }
+
+    var existingGame = await dbContext.GameStatuses.AnyAsync(e => e.UserId == userId && e.GameId == newGameReq.GameId);
+    if (existingGame)
+    {
+        return Results.Conflict(new {Message = $"Game status already exists for {game.Name} ({newGameReq.GameId})"});
+    }
     
     var gameId = newGameReq.GameId;
     var completed = newGameReq.Completed ?? false;
@@ -261,8 +277,9 @@ app.MapPost("/users/{userid}/games/", async ([FromServices] PlungerDbContext dbC
         return Results.BadRequest();
     }
     var status = new GameStatus() { UserId = userId,  GameId = gameId, Completed = completed, PlayState = (int)newGameReq.PlayState.Value, UpdatedAt = newGameReq.TimeStamp };
-    var stateChange = new PlayStateChange() { UpdatedAt = newGameReq.TimeStamp, NewState = (int)newGameReq.PlayState.Value};
-    var res = dbContext.GameStatuses.Add(status);
+    var stateChange = new PlayStateChange() { UpdatedAt = newGameReq.TimeStamp, NewState = (int)newGameReq.PlayState.Value, GameStatus = status};
+    dbContext.GameStatuses.Add(status);
+    dbContext.PlayStateChanges.Add(stateChange);
     await dbContext.SaveChangesAsync();
     
     return Results.Ok(new GameStatusResponse()

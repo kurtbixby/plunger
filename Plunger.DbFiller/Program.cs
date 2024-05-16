@@ -2,6 +2,8 @@
 using Microsoft.Extensions.Configuration;
 using Plunger.Common;
 using Plunger.Data;
+using Plunger.Data.DbModels;
+using Plunger.Data.Enums;
 using Plunger.Data.Utils;
 
 namespace Plunger.DbFiller;
@@ -14,15 +16,22 @@ public class Program
         var environmentName = Utils.GetEnvironmentVariable("Environment");
         Configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json", optional: false, reloadOnChange: true).AddJsonFile($"appsettings.{environmentName}.json", optional: true, reloadOnChange: true)
             .Build();
+        
+        // Create Db connection
+        var connString = Configuration["ConnectionStrings:DefaultConnection"];
+        var contextOptions = new DbContextOptionsBuilder<PlungerDbContext>().UseNpgsql(connString).Options;
+
+        // LoadFromIgdb(contextOptions);
+        await LoadRegions(contextOptions);
+    }
+
+    private static async Task LoadFromIgdb(DbContextOptions<PlungerDbContext> contextOptions)
+    {
         // Establish token
         var twitchConnector = new TwitchOauthConnector(Utils.GetEnvironmentVariable("ClientId"),
             Utils.GetEnvironmentVariable("ClientSecret"));
         var credentials = new TwitchCredentials(Utils.GetEnvironmentVariable("ClientId"), await twitchConnector.GetToken());
         var igdbConnector = new IgdbConnector(credentials);
-        
-        // Create Db connection
-        var connString = Configuration["ConnectionStrings:DefaultConnection"];
-        var contextOptions = new DbContextOptionsBuilder<PlungerDbContext>().UseNpgsql(connString).Options;
 
         // LoadPlatforms(igdbConnector, contextOptions).Wait();
         // Load Regions
@@ -84,8 +93,12 @@ public class Program
         } while (retrieved >= 500);
     }
 
-    private static async Task LoadRegions()
+    private static async Task LoadRegions(DbContextOptions<PlungerDbContext> dbContextOptions)
     {
-        
+        await using var db = new PlungerDbContext(dbContextOptions);
+        var regions = EnumStrings.RegionNames.Slice(1, EnumStrings.RegionNames.Count - 1)
+            .Select((e, index) => new Region() { Id = index + 1, Name = e });
+        db.Regions.AddRange(regions);
+        await db.SaveChangesAsync();
     }
 }

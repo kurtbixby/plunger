@@ -6,4 +6,5 @@ public class Collection
 
     public int UserId { get; set; }
     public User User { get; set; }
+    public List<CollectionGame> Games { get; set; }
 }

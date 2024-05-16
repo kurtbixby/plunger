@@ -27,6 +27,35 @@ public class NewListRequest
             result.ValidationErrors["name"] = "name is required";
         }
 
+        var entryNumbers = new HashSet<int>();
+        var gameIds = new HashSet<int>();
+        foreach (var gameEntry in Entries)
+        {
+            var validEntry = true;
+            {
+                var num = gameEntry.Number;
+                if (!entryNumbers.Add(num))
+                {
+                    validEntry = false;
+                    result.ValidationErrors["entries"] = "duplicate numbers in list";
+                }
+            }
+            {
+                var id = gameEntry.GameId;
+                if (!gameIds.Add(id))
+                {
+                    validEntry = false;
+                    result.ValidationErrors["entries"] = "duplicate games in list";
+                }
+            }
+
+            if (!validEntry)
+            {
+                result.IsValid = false;
+                break;
+            }
+        }
+
         return result;
     }
 }
