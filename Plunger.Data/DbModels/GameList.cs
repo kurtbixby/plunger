@@ -1,6 +1,6 @@
 namespace Plunger.Data.DbModels;
 
-public class GameList
+public class GameList : ProtectedEntity
 {
     public int Id { get; set; }
     public string Name { get; set; }

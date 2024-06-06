@@ -1,20 +1,103 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using System.Text.Json;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.Net.Http.Headers;
 using Plunger.Common;
 using Plunger.Data;
 using Plunger.Data.DbModels;
 using Plunger.WebApi;
 using Plunger.WebApi.DtoModels;
+using SameSiteMode = Microsoft.Net.Http.Headers.SameSiteMode;
 
 var builder = WebApplication.CreateBuilder(args);
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<PlungerDbContext>(options => options.UseNpgsql(connectionString));
+var appConnString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddDbContext<PlungerDbContext>(options => options.UseNpgsql(appConnString));
+// builder.Services.AddSingleton<JwtConfig>();
+// builder.Services.Configure<JwtConfig>(builder.Configuration.GetSection("Jwt"));
+{
+    var jwtConfig = new JwtConfig();
+    builder.Configuration.GetSection("Jwt").Bind(jwtConfig);
+    builder.Services.AddSingleton(jwtConfig);
+}
+
+// var userConnString = builder.Configuration.GetConnectionString("UserDefaultConnection");
+// builder.Services.AddDbContext<PlungerUserDbContext>(options => options.UseNpgsql(userConnString));
+// builder.Services.AddAuthentication();
+// builder.Services.AddAuthorization();
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(o =>
+{
+    o.MapInboundClaims = false;
+    o.TokenValidationParameters = new TokenValidationParameters()
+    {
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey
+            (Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = false,
+        ValidateIssuerSigningKey = true
+    };
+});
+builder.Services.AddAuthorization();
+
+// builder.Services.AddAuthentication(options =>
+// {
+//     options.DefaultAuthenticateScheme = JwtAuthenticationDefaults.AuthenticationScheme;
+//     options.DefaultChallengeScheme = JwtAuthenticationDefaults.AuthenticationScheme;
+// }).AddJwt(options =>
+// {
+//     options.Keys = ["whatisaman?amiserablelittlepileofsecrets"];
+// });
+// builder.Services.AddSingleton<IAlgorithmFactory>(new DelegateAlgorithmFactory(new HMACSHA256Algorithm()));
+// builder.Services.AddDistributedMemoryCache();
+// builder.Services.AddSession(options =>
+// {
+//     options.IdleTimeout = TimeSpan.FromSeconds(10);
+//     options.Cookie.Name = ".Plunger.AuthSession";
+//     options.Cookie.HttpOnly = true;
+//     options.Cookie.IsEssential = true;
+// });
+
+// app.UseSession();
+// app.UseSessionAuthMiddleware();
+
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
 var app = builder.Build();
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapGet("/", () => "Hello World!");
+
+app.MapGet("/testidentity", (HttpContext context) =>
+{
+    var rawIdentity = context.User.Identity;
+    var identity = context.User.Identity as ClaimsIdentity;
+    Console.WriteLine(identity);
+    if (identity != null)
+    {
+        IEnumerable<Claim> claims = identity.Claims; 
+        // or
+        var foo = identity.FindFirst("sub").Value;
+        Console.WriteLine(claims);
+        return Results.Ok(claims);
+    }
+
+    return Results.Problem();
+});
 
 app.MapGet("/games/{gameid}", async ([FromRoute] int gameId, [FromServices] PlungerDbContext db) =>
 {
@@ -295,8 +378,10 @@ app.MapGet("/users/{userId}/games/{gameId}", ([FromServices] PlungerDbContext db
 });
 
 app.MapPatch("/users/{userId}/games/{gameId}",
-    async ([FromServices] PlungerDbContext dbContext, [FromRoute] int userId, [FromRoute] int gameId, [FromBody] UpdateGameStatusDto updateGameReq) =>
+    async (HttpContext httpContext, [FromServices] PlungerDbContext dbContext, [FromRoute] int userId, [FromRoute] int gameId, [FromBody] UpdateGameStatusDto updateGameReq) =>
 {
+    // httpContext.User.Identity
+    
     var status = await dbContext.GameStatuses.Include(e => e.Game).FirstAsync(e => e.UserId == userId && e.GameId == gameId);
     if (updateGameReq.TimeStamp < status.UpdatedAt)
     {
@@ -315,7 +400,7 @@ app.MapPatch("/users/{userId}/games/{gameId}",
         Id = status.Id, UserId = status.UserId, Completed = status.Completed, PlayState = status.PlayState,
         UpdatedAt = status.UpdatedAt, Name = status.Game.Name, ShortName = status.Game.ShortName
     });
-});
+}).RequireAuthorization();
 
 app.MapPost("/users/", async ([FromServices] PlungerDbContext dbContext, [FromBody] NewUserRequest newUserReq) =>
 {
@@ -337,7 +422,7 @@ app.MapPost("/users/", async ([FromServices] PlungerDbContext dbContext, [FromBo
         // invalid request
         return Results.BadRequest(new { Message = "user already exists" });
     }
-    var pwHash = Utils.ComputePasswordHash(newUserReq.Password);
+    var pwHash = PasswordCrypto.ComputePasswordHash(newUserReq.Password);
 
     var newUser = new User() { Username = newUserReq.Username, Password = pwHash, Email = newUserReq.Email };
     var userRes = await dbContext.Users.AddAsync(newUser);
@@ -348,7 +433,7 @@ app.MapPost("/users/", async ([FromServices] PlungerDbContext dbContext, [FromBo
         { Success = $"created user with id {userRes.Entity.Id}", Debug = $"collection id: {collectionRes.Entity.Id}" });
 });
 
-app.MapPost("/users/login/", async ([FromServices] PlungerDbContext dbContext, [FromBody] LoginRequest loginRequest) =>
+app.MapPost("/users/login/", async (HttpContext httpContext, [FromServices] PlungerDbContext dbContext, [FromServices] JwtConfig jwtConfig, [FromBody] LoginRequest loginRequest) =>
 {
     var validationRes = loginRequest.Validate();
     if (!validationRes.IsValid)
@@ -372,8 +457,27 @@ app.MapPost("/users/login/", async ([FromServices] PlungerDbContext dbContext, [
         : await dbContext.Users.FirstAsync(e => String.Equals(e.Username, loginRequest.Identity));
 
     // Compare password
-    var success = Utils.CheckPassword(loginRequest.Password, user.Password);
-    return Results.Ok(new LoginResponse() { Login = success });
+    var success = PasswordCrypto.CheckPassword(loginRequest.Password, user.Password);
+
+    var token = TokenUtils.CreateToken(jwtConfig, user, out var randomString);
+
+    var options = new CookieOptions()
+    {
+        HttpOnly = true,
+        Secure = true,
+        SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Strict,
+        MaxAge = TimeSpan.FromMinutes(10)
+    };
+    // var cookie = new SetCookieHeaderValue("fingerprint", randomString)
+    // {
+    //     HttpOnly = true,
+    //     Secure = true,
+    //     SameSite = SameSiteMode.Strict,
+    //     MaxAge = TimeSpan.FromMinutes(10)
+    // };
+
+    httpContext.Response.Cookies.Append("fingerprint", randomString, options);
+    return Results.Ok(new {Token = token});
 });
 
 app.Run();

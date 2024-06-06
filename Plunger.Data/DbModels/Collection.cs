@@ -1,6 +1,6 @@
 namespace Plunger.Data.DbModels;
 
-public class Collection
+public class Collection : ProtectedEntity
 {
     public int Id { get; set; }
 
