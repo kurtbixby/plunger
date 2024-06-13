@@ -1,25 +1,20 @@
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.Net.Http.Headers;
 using Plunger.Common;
 using Plunger.Data;
 using Plunger.Data.DbModels;
 using Plunger.WebApi;
 using Plunger.WebApi.DtoModels;
-using SameSiteMode = Microsoft.Net.Http.Headers.SameSiteMode;
+using Plunger.WebApi.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 var appConnString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<PlungerDbContext>(options => options.UseNpgsql(appConnString));
-// builder.Services.AddSingleton<JwtConfig>();
-// builder.Services.Configure<JwtConfig>(builder.Configuration.GetSection("Jwt"));
 {
     var jwtConfig = new JwtConfig();
     builder.Configuration.GetSection("Jwt").Bind(jwtConfig);
@@ -53,31 +48,11 @@ builder.Services.AddAuthentication(options =>
 });
 builder.Services.AddAuthorization();
 
-// builder.Services.AddAuthentication(options =>
-// {
-//     options.DefaultAuthenticateScheme = JwtAuthenticationDefaults.AuthenticationScheme;
-//     options.DefaultChallengeScheme = JwtAuthenticationDefaults.AuthenticationScheme;
-// }).AddJwt(options =>
-// {
-//     options.Keys = ["whatisaman?amiserablelittlepileofsecrets"];
-// });
-// builder.Services.AddSingleton<IAlgorithmFactory>(new DelegateAlgorithmFactory(new HMACSHA256Algorithm()));
-// builder.Services.AddDistributedMemoryCache();
-// builder.Services.AddSession(options =>
-// {
-//     options.IdleTimeout = TimeSpan.FromSeconds(10);
-//     options.Cookie.Name = ".Plunger.AuthSession";
-//     options.Cookie.HttpOnly = true;
-//     options.Cookie.IsEssential = true;
-// });
-
-// app.UseSession();
-// app.UseSessionAuthMiddleware();
-
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 var app = builder.Build();
 app.UseAuthentication();
+app.UseTokenFingerprintMiddleware();
 app.UseAuthorization();
 
 app.MapGet("/", () => "Hello World!");
@@ -116,13 +91,30 @@ app.MapGet("/users/{userid}/collection", async ([FromRoute] int userId, [FromSer
         })
     }).Where(collection => collection.UserId == userId).ToListAsync());
 
-app.MapPost("/users/{userid}/collection", async ([FromRoute] int userId, [FromServices] PlungerDbContext db, [FromBody] CollectionAddGameRequest req) =>
+app.MapPost("/users/{userid}/collection", async (HttpContext httpContext, [FromRoute] int userId, [FromServices] PlungerDbContext db, [FromBody] CollectionAddGameRequest req) =>
 {
     var validRes = req.Validate();
 
     if (!validRes.IsValid)
     {
         return Results.BadRequest(validRes.ValidationErrors);
+    }
+
+    {
+        // Token fingerprint verification
+        var fingerprintHash = IdUtils.GetFingerprint(httpContext.User);
+        var fingerprint = httpContext.Request.Cookies[Constants.TokenFingerprint];
+        var goodToken = TokenUtils.VerifyTokenFingerprint(fingerprintHash, fingerprint);
+        if (!goodToken)
+        {
+            return Results.BadRequest(new { Error = "Invalid token fingerprint" });
+        }
+    }
+
+    // Check ownership
+    if (!IdUtils.CheckUserOwnership(httpContext.User, userId.ToString()))
+    {
+        return Results.Unauthorized();
     }
 
     try
@@ -148,7 +140,7 @@ app.MapPost("/users/{userid}/collection", async ([FromRoute] int userId, [FromSe
     {
         return Results.Problem();
     }
-});
+}).RequireAuthorization();
 
 app.MapPatch("/users/{userid}/collection/{itemid}", async ([FromRoute] int userId, [FromRoute] int itemId, [FromServices] PlungerDbContext db, [FromBody] CollectionGamePatchRequest req) =>
 {
@@ -476,7 +468,7 @@ app.MapPost("/users/login/", async (HttpContext httpContext, [FromServices] Plun
     //     MaxAge = TimeSpan.FromMinutes(10)
     // };
 
-    httpContext.Response.Cookies.Append("fingerprint", randomString, options);
+    httpContext.Response.Cookies.Append(Constants.TokenFingerprint, randomString, options);
     return Results.Ok(new {Token = token});
 });
 

@@ -11,7 +11,7 @@ public class TokenUtils
 {
     public static string CreateToken(JwtConfig jwtConfig, User user, out string randomFingerprint)
     {
-        randomFingerprint = GenerateRandomBase64String();
+        randomFingerprint = GenerateRandomBase64UrlString();
         var issuer = jwtConfig.Issuer;
         var audience = jwtConfig.Audience;
         var key = Encoding.ASCII.GetBytes
@@ -20,13 +20,13 @@ public class TokenUtils
         {
             Subject = new ClaimsIdentity(new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Username),
-                new Claim(JwtRegisteredClaimNames.Email, user.Username),
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim(JwtRegisteredClaimNames.Jti,
                     Guid.NewGuid().ToString()),
-                new Claim(Constants.UserId, user.Id.ToString()),
+                // new Claim(Constants.UserId, user.Id.ToString()),
                 // Hash of RandomString
-                new Claim(Constants.TokenFingerprint, HashBase64String(randomFingerprint))
+                new Claim(Constants.TokenFingerprint, HashBase64UrlString(randomFingerprint))
             }),
             Expires = DateTime.UtcNow.AddMinutes(15),
             Issuer = issuer,
@@ -42,19 +42,39 @@ public class TokenUtils
         return tokenString;
     }
 
+    public static bool VerifyTokenFingerprint(string fingerprintHash, string fingerprint)
+    {
+        return string.Equals(HashBase64UrlString(fingerprint), fingerprintHash);
+    }
+
+    private static string GenerateRandomBase64UrlString()
+    {
+        return Base64UrlEncoder.Encode(GenerateRandomBytes());
+    }
+
     private static string GenerateRandomBase64String()
     {
+        return Convert.ToBase64String(GenerateRandomBytes());
+    }
+
+    private static byte[] GenerateRandomBytes()
+    {
         var bytes = new byte[64];
-        var rng = new RNGCryptoServiceProvider();
-        rng.GetBytes(bytes);
-        return Convert.ToBase64String(bytes);
+        RandomNumberGenerator.Fill(bytes);
+        return bytes;
     }
 
     private static string HashBase64String(string str)
     {
-        var hasher = SHA256.Create();
         var bytes = Convert.FromBase64String(str);
-        var hashedBytes = hasher.ComputeHash(bytes);
+        var hashedBytes = SHA256.HashData(bytes);
         return Convert.ToBase64String(hashedBytes);
+    }
+
+    private static string HashBase64UrlString(string str)
+    {
+        var bytes = Base64UrlEncoder.DecodeBytes(str);
+        var hashedBytes = SHA256.HashData(bytes);
+        return Base64UrlEncoder.Encode(hashedBytes);
     }
 }
