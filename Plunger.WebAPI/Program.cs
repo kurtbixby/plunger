@@ -58,7 +58,7 @@ builder.Services.AddCors(options =>
         {
             // policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
             // policy.SetIsOriginAllowed(origin => new Uri(origin).IsLoopback);
-            policy.WithOrigins("http://localhost:5173").AllowAnyHeader()
+            policy.WithOrigins("http://localhost:5173", "https://localhost:5173").AllowAnyHeader()
                 .AllowAnyMethod().AllowCredentials();
         });
     // options.AddDefaultPolicy(
@@ -86,9 +86,9 @@ app.MapGet("/games/{gameid}", async ([FromRoute] int gameId, [FromServices] Plun
 #warning TODO: Add pagination to results
 app.MapGet("/users/{userid}/lists", async ([FromRoute] int userId, [FromServices] PlungerDbContext db) => await db.GameLists.Where(gl => gl.UserId == userId).ToListAsync());
 
-app.MapGroup("/").MapCollectionRoutes();
-app.MapGroup("/").MapListRoutes();
-app.MapGroup("/").MapGameStateRoutes();
-app.MapGroup("/").MapUsersRoutes();
+app.MapGroup("/api").MapCollectionRoutes();
+app.MapGroup("/api").MapListRoutes();
+app.MapGroup("/api").MapGameStateRoutes();
+app.MapGroup("/api").MapUsersRoutes();
 
 app.Run();

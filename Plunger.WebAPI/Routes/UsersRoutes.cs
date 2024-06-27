@@ -81,8 +81,9 @@ public static class UsersRoutes
         {
             HttpOnly = true,
             Secure = true,
-            SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Strict,
-            MaxAge = TimeSpan.FromMinutes(10)
+            #warning CHANGE IN PRODUCTION
+            SameSite = SameSiteMode.Strict,
+            MaxAge = TimeSpan.FromMinutes(10),
         };
         // var cookie = new SetCookieHeaderValue("fingerprint", randomString)
         // {

@@ -16,7 +16,7 @@ const queryClient = new QueryClient({
 });
 
 function App() {
-  const currentUser = useState(null);
+  const currentUser = useState({loggedIn: false, userName: null});
   return (
     <BrowserRouter>
       <QueryClientProvider client={queryClient}>
