@@ -2,7 +2,7 @@ import { makeRequest as makeBaseRequest } from "./Requests";
 
 let accessToken = "";
 const baseAddress = "https://localhost";
-const port = "5213";
+const port = "7004";
 const combinedBaseUrl = baseAddress.concat(':', port);
 
 function updateToken(newToken) {

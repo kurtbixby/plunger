@@ -82,7 +82,7 @@ public static class UsersRoutes
             HttpOnly = true,
             Secure = true,
             #warning CHANGE IN PRODUCTION
-            SameSite = SameSiteMode.Strict,
+            SameSite = SameSiteMode.None,
             MaxAge = TimeSpan.FromMinutes(10),
         };
         // var cookie = new SetCookieHeaderValue("fingerprint", randomString)

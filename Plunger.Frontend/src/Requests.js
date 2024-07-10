@@ -15,9 +15,9 @@ async function makeDeleteRequest(url, extHeaders = {}){
 async function makeRequest(method, url, payload, extHeaders = {}) {
     let fetchOptions = {
         method: method,
+        credentials: "include",
         headers: {
             "Content-Type": "application/json",
-            "Credentials": "include",
             ...extHeaders
         }
     };
