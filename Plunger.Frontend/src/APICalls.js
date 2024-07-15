@@ -1,4 +1,5 @@
 import UserRequestsWrapper from "./UserRequestsWrapper";
+import TokenManagement from "./TokenManagement"
 
 /*
 Handle user login/logout
@@ -10,9 +11,21 @@ Exports functions for each call
 // What if a request fails or goes wrong
 async function sendLoginRequest({identity, password}) {
     let loginRequest = { identity, password};
-    let { userName, token } = await UserRequestsWrapper.makePostRequest("/api/users/login", loginRequest);
+    let response = await UserRequestsWrapper.makePostRequest("/api/users/login", loginRequest, {}, false);
+    let { userDetails, token } = response;
     UserRequestsWrapper.updateToken(token);
-    return userName;
+    TokenManagement.storeToken(token);
+    return userDetails;
+}
+
+async function sendTokenLoginRequest(token) {
+    try {
+        UserRequestsWrapper.updateToken(token);
+        return await UserRequestsWrapper.makeGetRequest("/api/users/tokenLogin");
+    } catch (error) {
+        UserRequestsWrapper.clearToken();
+        throw error;
+    }
 }
 
 async function sendNewUserRequest(newUserRequest) {
@@ -57,4 +70,4 @@ async function sendDeleteGameStatusRequest(userId, gameId) {
     return await UserRequestsWrapper.makeDeleteRequest(`/api/users/${userId}/games/${gameId}`, {...authHeader});
 }
 
-export default { sendLoginRequest, sendNewUserRequest, sendAddGameRequest, sendEditGameRequest, sendDeleteGameRequest, sendCreateListRequest, sendEditListRequest, sendDeleteListRequest, sendAddGameStatusRequest, sendEditGameStatusRequest, sendDeleteGameStatusRequest };
+export default { sendLoginRequest, sendTokenLoginRequest, sendNewUserRequest, sendAddGameRequest, sendEditGameRequest, sendDeleteGameRequest, sendCreateListRequest, sendEditListRequest, sendDeleteListRequest, sendAddGameStatusRequest, sendEditGameStatusRequest, sendDeleteGameStatusRequest };

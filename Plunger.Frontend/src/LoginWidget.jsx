@@ -1,8 +1,11 @@
 import { useContext, useState } from "react";
 import { objFromForm } from "./Utils.js";
 import API from "./APICalls.js";
+import CurrentUserContext from "./CurrentUserContext.js";
 
 function LoginWidget() {
+    const [user, setUser] = useContext(CurrentUserContext);
+    
     const [state, setState] = useState({
         username: "",
         password: ""
@@ -12,8 +15,9 @@ function LoginWidget() {
         e.preventDefault();
 
         var formData = objFromForm(e.target);
-        var resp = await API.sendLoginRequest({identity: formData.username, password: formData.password});
-        console.log(resp);
+        var userDetails = await API.sendLoginRequest({identity: formData.username, password: formData.password});
+        setUser({...user, loggedIn: true, userName: userDetails.userName, userId: userDetails.userId});
+        console.log(userDetails);
     }
 
     function editValue(name, value) {

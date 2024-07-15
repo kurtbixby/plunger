@@ -13,6 +13,7 @@ public static class UsersRoutes
     {
         group.MapPost("/users/", CreateUser);
         group.MapPost("/users/login", LoginUser);
+        group.MapGet("/users/tokenlogin", TokenLogin).RequireAuthorization();
 
         return group;
     }
@@ -77,13 +78,12 @@ public static class UsersRoutes
 
         var token = TokenUtils.CreateToken(jwtConfig, user, out var randomString);
 
-        var options = new CookieOptions()
+        var fingerprintOptions = new CookieOptions()
         {
             HttpOnly = true,
             Secure = true,
             #warning CHANGE IN PRODUCTION
-            SameSite = SameSiteMode.None,
-            MaxAge = TimeSpan.FromMinutes(10),
+            SameSite = SameSiteMode.None
         };
         // var cookie = new SetCookieHeaderValue("fingerprint", randomString)
         // {
@@ -93,7 +93,18 @@ public static class UsersRoutes
         //     MaxAge = TimeSpan.FromMinutes(10)
         // };
 
-        httpContext.Response.Cookies.Append(Constants.TokenFingerprint, randomString, options);
-        return Results.Ok(new {Token = token});
+        httpContext.Response.Cookies.Append(Constants.TokenFingerprint, randomString, fingerprintOptions);
+        return Results.Ok(new {UserDetails = new {userId = user.Id, userName = user.Username}, Token = token});
+    }
+
+    private static IResult TokenLogin(HttpContext httpContext, [FromServices] PlungerDbContext dbContext)
+    {
+        var userDetails = TokenUtils.GetUserDetailsFromClaims(httpContext);
+        if (userDetails.UserId == "" || userDetails.UserName == "")
+        {
+            return Results.Problem();
+        }
+
+        return Results.Ok(userDetails);
     }
 }

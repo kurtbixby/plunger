@@ -25,7 +25,10 @@ async function makeRequest(method, url, payload, extHeaders = {}) {
         fetchOptions.body = JSON.stringify(payload);
     }
     console.log(url);
-    let response = await fetch(url, fetchOptions);
+    const response = await fetch(url, fetchOptions);
+    if (!response.ok) {
+        throw new Error(response.status);
+    }
     return await response.json();
 }
 

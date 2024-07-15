@@ -1,4 +1,5 @@
 import {useContext} from "react";
+import {Link} from "react-router-dom";
 import CurrentUserContext from "./CurrentUserContext.js";
 import LoginWidget from "./LoginWidget.jsx";
 
@@ -7,8 +8,23 @@ function TopNavigation() {
     
   return (
     <header>
-        {user.loggedIn ? <h1>Time to clear your backlog {user}!</h1>
-            : <LoginWidget />
+        {!user.loggedIn ? <LoginWidget/>
+            : <>
+                <h1>Time to clear your backlog {user.userName}!</h1>
+                <nav>
+                    <ul>
+                        <li>
+                            <Link to={"/" + user.userName}>My Profile</Link>
+                        </li>
+                        <li>
+                            <Link to={"/" + user.userName + "/collection"}>Collection</Link>
+                        </li>
+                        <li>
+                            <Link to={"/" + user.userName + "/lists"}>Lists</Link>
+                        </li>
+                    </ul>
+                </nav>
+            </>
         }
     </header>
   );
