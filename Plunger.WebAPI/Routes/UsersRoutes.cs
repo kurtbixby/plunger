@@ -85,13 +85,6 @@ public static class UsersRoutes
             #warning CHANGE IN PRODUCTION
             SameSite = SameSiteMode.None
         };
-        // var cookie = new SetCookieHeaderValue("fingerprint", randomString)
-        // {
-        //     HttpOnly = true,
-        //     Secure = true,
-        //     SameSite = SameSiteMode.Strict,
-        //     MaxAge = TimeSpan.FromMinutes(10)
-        // };
 
         httpContext.Response.Cookies.Append(Constants.TokenFingerprint, randomString, fingerprintOptions);
         return Results.Ok(new {UserDetails = new {userId = user.Id, userName = user.Username}, Token = token});
