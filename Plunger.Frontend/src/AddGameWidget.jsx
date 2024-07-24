@@ -1,9 +1,11 @@
-import { useContext, useState } from "react";
+import {useContext, useEffect, useState, useRef} from "react";
+import APICalls from "./APICalls.js";
 import CurrentUserContext from "./CurrentUserContext";
+import {useOnClickOutside} from "usehooks-ts";
 
 function AddGameWidget() {
   const [currentUser] = useContext(CurrentUserContext);
-  const [state, setState] = useState({
+  const [formState, setFormState] = useState({
     gameName: "",
     platform: "",
     version: "",
@@ -12,6 +14,56 @@ function AddGameWidget() {
     region: "",
     dateAcquired: todaysDateString(),
   });
+  
+  const [gameName, setGameName] = useState("");
+  const [chosenGame, setChosenGame] = useState({});
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearchDropDownOpen, setIsSearchDropDownOpen] = useState(false);
+  
+  // if focused = isOpen
+
+    useEffect(() => {
+        (async () => {
+            if (gameName.length < 2) {
+                return;
+            }
+            
+            // make search game request
+            const searchResponse = await APICalls.sendGameSearchRequest(gameName);
+            setSearchResults(searchResponse);
+        })();
+    }, [gameName]);
+
+    
+    // function useOutsideClick(callback) {
+    //     const ref = useRef();
+    //    
+    //     useEffect(() => {
+    //         const handleClick = (event) => {
+    //             console.log("Handling Click");
+    //             if (ref.current && ref.current !== event.target) {
+    //                 console.log("About to close");
+    //                 callback();
+    //             }
+    //         }
+    //    
+    //         document.addEventListener('click', handleClick, true);
+    //    
+    //         return () => {
+    //             document.removeEventListener('click', handleClick, true);
+    //         }
+    //     }, [ref]);
+    //    
+    //     return ref;
+    // }
+    // const ref = useOutsideClick(closeDropDown);
+    
+    const ref = useRef(null);
+    useOnClickOutside(ref, closeDropDown);
+    
+    function handleSafeClick(event) {
+        event.stopPropagation();
+    }
 
   function todaysDateString() {
     const date = new Date().toISOString();
@@ -21,8 +73,8 @@ function AddGameWidget() {
   }
 
   function editValue(name, value) {
-    setState({
-      ...state,
+    setFormState({
+      ...formState,
       [name]: value,
     });
   }
@@ -30,7 +82,14 @@ function AddGameWidget() {
   function submitAddGame(event) {
     event.preventDefault();
     
-    console.log(state);
+    console.log(formState);
+  }
+  
+  function openDropDown() {
+      setIsSearchDropDownOpen(true);
+  }
+  function closeDropDown() {
+      setIsSearchDropDownOpen(false);
   }
   
   function validateFormInputs() {
@@ -60,24 +119,42 @@ function AddGameWidget() {
   // function editDate(newDate) {
   //   state.date = newDate;
   // }
+    
+    function selectGame(game) {
+        console.log("Selected: " + game.name);
+    }
 
   return (
       <form className="bg-purple-500" onSubmit={submitAddGame}>
           <div>
               <label htmlFor="gameName">Game Name:</label>
-              <input
-                  name="gameName"
-                  type="text"
-                  value={state.gameName}
-                  onChange={(e) => editValue(e.target.name, e.target.value)}
-              />
+              <div 
+                   ref={ref}>
+                  <p>TEST TAG</p>
+                  <input
+                      name="gameName"
+                      type="text"
+                      value={gameName}
+                      onChange={(e) => setGameName(e.target.value)}
+                      onClick={openDropDown}
+                  />
+                  <div>
+                      {isSearchDropDownOpen && (
+                          <ul>
+                              {searchResults.slice(0,5).map((game) => (
+                                  <li className={"hover:bg-amber-400"} key={game.id} onClick={() => selectGame(game)}>{game.name}</li>
+                              ))}
+                          </ul>
+                      )}
+                  </div>
+              </div>
           </div>
           <div>
               <label htmlFor="platform">Platform:</label>
               <input
                   name="platform"
                   type="text"
-                  value={state.platform}
+                  value={formState.platform}
                   onChange={(e) => editValue(e.target.name, e.target.value)}
               />
           </div>
@@ -86,7 +163,7 @@ function AddGameWidget() {
               <input
                   name="version"
                   type="text"
-                  value={state.version}
+                  value={formState.version}
                   onChange={(e) => editValue(e.target.name, e.target.value)}
               />
           </div>
@@ -95,7 +172,7 @@ function AddGameWidget() {
               <input
                   name="region"
                   type="text"
-                  value={state.region}
+                  value={formState.region}
                   onChange={(e) => editValue(e.target.name, e.target.value)}
               />
           </div>
@@ -124,7 +201,7 @@ function AddGameWidget() {
               <input
                   name="price"
                   type="text"
-                  value={state.price ? String(state.price) : ""}
+                  value={formState.price ? String(formState.price) : ""}
                   onChange={(e) => editValue(e.target.name, e.target.value)}
               />
           </div>
@@ -133,7 +210,7 @@ function AddGameWidget() {
               <input
                   name="dateAcquired"
                   type="date"
-                  value={state.dateAcquired}
+                  value={formState.dateAcquired}
                   onChange={(e) => editValue(e.target.name, e.target.value)}
               />
           </div>

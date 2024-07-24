@@ -33,41 +33,45 @@ async function sendNewUserRequest(newUserRequest) {
 }
 
 async function sendAddGameRequest(userId, addGameRequest) {
-    return await UserRequestsWrapper.makePostRequest(`/api/users/${userId}/collection`, addGameRequest, {...authHeader});
+    return await UserRequestsWrapper.makePostRequest(`/api/users/${userId}/collection`, addGameRequest);
 }
 
 async function sendEditGameRequest(userId, itemId, editGameRequest) {
-    return await UserRequestsWrapper.makePatchRequest(`/api/users/${userId}/collection/${itemId}`, editGameRequest, {...authHeader});
+    return await UserRequestsWrapper.makePatchRequest(`/api/users/${userId}/collection/${itemId}`, editGameRequest);
 }
 
 async function sendDeleteGameRequest(userId, itemId) {
-    return await UserRequestsWrapper.makeDeleteRequest(`/api/users/${userId}/collection/${itemId}`, {...authHeader});
+    return await UserRequestsWrapper.makeDeleteRequest(`/api/users/${userId}/collection/${itemId}`);
 }
 
 async function sendCreateListRequest(createListRequest) {
-    return await UserRequestsWrapper.makePostRequest("/api/lists", createListRequest,{...authHeader});
+    return await UserRequestsWrapper.makePostRequest("/api/lists", createListRequest);
 }
 
 async function sendEditListRequest(listId, editListRequest) {
-    return await UserRequestsWrapper.makePatchRequest(`/api/lists/${listId}`, editListRequest, {...authHeader});
+    return await UserRequestsWrapper.makePatchRequest(`/api/lists/${listId}`, editListRequest);
 }
 
 // Delete List is unimplemented on the backend
 async function sendDeleteListRequest(listId, editListRequest) {
-    return await UserRequestsWrapper.makeDeleteRequest(`/api/lists/${listId}`, {...authHeader});
+    return await UserRequestsWrapper.makeDeleteRequest(`/api/lists/${listId}`);
 }
 
 async function sendAddGameStatusRequest(userId, addGameStatusRequest) {
-    return await UserRequestsWrapper.makePostRequest(`/api/users/${userId}/games`, addGameStatusRequest, {...authHeader});
+    return await UserRequestsWrapper.makePostRequest(`/api/users/${userId}/games`, addGameStatusRequest);
 }
 
 async function sendEditGameStatusRequest(userId, gameId, editGameStatusRequest) {
-    return await UserRequestsWrapper.makePatchRequest(`/api/users/${userId}/games/${gameId}`, editGameStatusRequest, {...authHeader});
+    return await UserRequestsWrapper.makePatchRequest(`/api/users/${userId}/games/${gameId}`, editGameStatusRequest);
 }
 
 // Delete GameStatus is unimplemented on the backend
 async function sendDeleteGameStatusRequest(userId, gameId) {
-    return await UserRequestsWrapper.makeDeleteRequest(`/api/users/${userId}/games/${gameId}`, {...authHeader});
+    return await UserRequestsWrapper.makeDeleteRequest(`/api/users/${userId}/games/${gameId}`);
 }
 
-export default { sendLoginRequest, sendTokenLoginRequest, sendNewUserRequest, sendAddGameRequest, sendEditGameRequest, sendDeleteGameRequest, sendCreateListRequest, sendEditListRequest, sendDeleteListRequest, sendAddGameStatusRequest, sendEditGameStatusRequest, sendDeleteGameStatusRequest };
+async function sendGameSearchRequest(gameName) {
+    return await UserRequestsWrapper.makeGetRequest(`/api/games?name=${gameName}`);
+}
+
+export default { sendLoginRequest, sendTokenLoginRequest, sendNewUserRequest, sendAddGameRequest, sendEditGameRequest, sendDeleteGameRequest, sendCreateListRequest, sendEditListRequest, sendDeleteListRequest, sendAddGameStatusRequest, sendEditGameStatusRequest, sendDeleteGameStatusRequest, sendGameSearchRequest };

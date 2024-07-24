@@ -43,7 +43,7 @@ function LoginWidget() {
                     <label htmlFor="password">Password:</label>
                     <input
                         name="password"
-                        type=""
+                        type="password"
                         value={state.password}
                         onChange={(e) => editValue(e.target.name, e.target.value)}
                     />
