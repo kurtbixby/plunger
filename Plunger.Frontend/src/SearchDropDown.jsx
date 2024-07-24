@@ -1,25 +1,28 @@
-import 
+import SearchDropDownItem from "./SearchDropDownItem.jsx"; 
 
 function SearchDropDown(props) {
-    const { labelText, name, type, value } = props;
-    
-    function onChange(event) {
-        // editValue(e.target.name, e.target.value);
-        // update value
-        // length check for presence of dropdown
-        // make request
-        // fill in/build dropdown with results
-    }
+    const { onFocus, onTextChange, onItemSelect, isOpen, searchResults, name, value } = props;
     
     return (
-        <div>
-            <label htmlFor={name}>{labelText}</label>
+        <>
             <input
                 name={name}
-                type={type}
+                type={"text"}
                 value={value}
-                onChange={(e) => onChange(e)}
+                onClick={onFocus}
+                onChange={(e) => onTextChange(e)}
             />
-        </div>
+            <div>
+                {isOpen && (
+                    <ul>
+                        {searchResults.slice(0, 5).map((game) => (
+                            <SearchDropDownItem key={game.id} text={game.name} callback={() => onItemSelect(game)}/>
+                        ))}
+                    </ul>
+                )}
+            </div>
+        </>
     )
 }
+
+export default SearchDropDown;

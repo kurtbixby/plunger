@@ -2,6 +2,7 @@ import {useContext, useEffect, useState, useRef} from "react";
 import APICalls from "./APICalls.js";
 import CurrentUserContext from "./CurrentUserContext";
 import {useOnClickOutside} from "usehooks-ts";
+import SearchDropDown from "./SearchDropDown";
 
 function AddGameWidget() {
   const [currentUser] = useContext(CurrentUserContext);
@@ -19,6 +20,9 @@ function AddGameWidget() {
   const [chosenGame, setChosenGame] = useState({});
   const [searchResults, setSearchResults] = useState([]);
   const [isSearchDropDownOpen, setIsSearchDropDownOpen] = useState(false);
+  
+  // This could be somewhat hardcoded, definitely cached
+  const [platforms, setPlatforms] = useState([]);
   
   // if focused = isOpen
 
@@ -58,8 +62,8 @@ function AddGameWidget() {
     // }
     // const ref = useOutsideClick(closeDropDown);
     
-    const ref = useRef(null);
-    useOnClickOutside(ref, closeDropDown);
+    const gameSearchRef = useRef(null);
+    useOnClickOutside(gameSearchRef, closeSearchDropDown);
     
     function handleSafeClick(event) {
         event.stopPropagation();
@@ -88,7 +92,7 @@ function AddGameWidget() {
   function openDropDown() {
       setIsSearchDropDownOpen(true);
   }
-  function closeDropDown() {
+  function closeSearchDropDown() {
       setIsSearchDropDownOpen(false);
   }
   
@@ -128,29 +132,16 @@ function AddGameWidget() {
       <form className="bg-purple-500" onSubmit={submitAddGame}>
           <div>
               <label htmlFor="gameName">Game Name:</label>
-              <div 
-                   ref={ref}>
+              <div ref={gameSearchRef}>
                   <p>TEST TAG</p>
-                  <input
-                      name="gameName"
-                      type="text"
-                      value={gameName}
-                      onChange={(e) => setGameName(e.target.value)}
-                      onClick={openDropDown}
-                  />
-                  <div>
-                      {isSearchDropDownOpen && (
-                          <ul>
-                              {searchResults.slice(0,5).map((game) => (
-                                  <li className={"hover:bg-amber-400"} key={game.id} onClick={() => selectGame(game)}>{game.name}</li>
-                              ))}
-                          </ul>
-                      )}
-                  </div>
+                  <SearchDropDown onFocus={openDropDown} onTextChange={(e) => setGameName(e.target.value)} isOpen={isSearchDropDownOpen} searchResults={searchResults} name={"gameName"} value={gameName} />
               </div>
           </div>
           <div>
               <label htmlFor="platform">Platform:</label>
+              {/* Turn this into a select */}
+              {/* Filter for possible platforms */}
+              {/* What about validity going into db? */}
               <input
                   name="platform"
                   type="text"
