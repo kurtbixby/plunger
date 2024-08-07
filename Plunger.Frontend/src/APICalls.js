@@ -74,4 +74,8 @@ async function sendGameSearchRequest(gameName) {
     return await UserRequestsWrapper.makeGetRequest(`/api/games?name=${gameName}`);
 }
 
-export default { sendLoginRequest, sendTokenLoginRequest, sendNewUserRequest, sendAddGameRequest, sendEditGameRequest, sendDeleteGameRequest, sendCreateListRequest, sendEditListRequest, sendDeleteListRequest, sendAddGameStatusRequest, sendEditGameStatusRequest, sendDeleteGameStatusRequest, sendGameSearchRequest };
+async function sendPlatformsRequest() {
+    return await UserRequestsWrapper.makeGetRequest(`/api/info/platforms`);
+}
+
+export default { sendLoginRequest, sendTokenLoginRequest, sendNewUserRequest, sendAddGameRequest, sendEditGameRequest, sendDeleteGameRequest, sendCreateListRequest, sendEditListRequest, sendDeleteListRequest, sendAddGameStatusRequest, sendEditGameStatusRequest, sendDeleteGameStatusRequest, sendGameSearchRequest, sendPlatformsRequest };

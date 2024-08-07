@@ -87,6 +87,7 @@ app.MapGet("/games/{gameid}", async ([FromRoute] int gameId, [FromServices] Plun
 app.MapGet("/users/{userid}/lists", async ([FromRoute] int userId, [FromServices] PlungerDbContext db) => await db.GameLists.Where(gl => gl.UserId == userId).ToListAsync());
 
 app.MapGroup("/api").MapGameRoutes();
+app.MapGroup("/api").MapInfoRoutes();
 app.MapGroup("/api").MapCollectionRoutes();
 app.MapGroup("/api").MapListRoutes();
 app.MapGroup("/api").MapGameStateRoutes();
