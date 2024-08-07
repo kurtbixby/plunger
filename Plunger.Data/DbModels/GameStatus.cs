@@ -1,6 +1,6 @@
 namespace Plunger.Data.DbModels;
 
-public class GameStatus : ProtectedEntity
+public class GameStatus
 {
     public int Id { get; set; }
     public bool Completed { get; set; }

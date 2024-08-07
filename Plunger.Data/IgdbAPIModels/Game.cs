@@ -20,6 +20,9 @@ public record Game
     [JsonPropertyName("release_dates")]
     public List<ReleaseDate>? ReleaseDates { get; init; }
     
+    [JsonPropertyName("age_ratings")]
+    public List<AgeRating>? AgeRatings { get; init; }
+    
     [JsonPropertyName("updated_at")]
     [JsonConverter(typeof(Utils.DateTimeOffsetUnixJsonConverter))]
     public DateTimeOffset UpdatedAt { get; init; }

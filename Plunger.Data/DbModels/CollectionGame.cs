@@ -2,7 +2,7 @@ using Plunger.Data.Enums;
 
 namespace Plunger.Data.DbModels;
 
-public class CollectionGame : ProtectedEntity
+public class CollectionGame
 {
     public int Id { get; set; }
     public DateTimeOffset TimeAdded { get; set; }
@@ -12,7 +12,7 @@ public class CollectionGame : ProtectedEntity
     public int CollectionId { get; set; }
     public int GameId { get; set; }
     public int PlatformId { get; set; }
-    public RegionName Region { get; set; }
+    public Enums.Region Region { get; set; }
     public Guid VersionId { get; set; }
     
     public int RegionId { get; set; }

@@ -5,16 +5,16 @@ public static class EnumStrings
     public static List<string> RegionNames = new List<string>()
     {
         "Unknown",
-        "Europe",
         "North America",
-        "Australia",
-        "New Zealand",
         "Japan",
-        "China",
+        "Europe",
         "Asia",
-        "Global",
+        "Australia",
+        "Brazil",
+        "China",
+        "Germany",
         "Korea",
-        "Brazil"
+        "New Zealand",
     };
     
     public static List<string> PlayStates = new List<string>()

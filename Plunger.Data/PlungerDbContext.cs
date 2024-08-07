@@ -29,5 +29,8 @@ public class PlungerDbContext : DbContext
         modelBuilder.Entity<Game>()
             .HasMany(e => e.Platforms)
             .WithMany();
+        modelBuilder.Entity<Game>()
+            .HasMany(e => e.Regions)
+            .WithMany();
     }
 }

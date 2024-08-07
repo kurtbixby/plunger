@@ -19,6 +19,9 @@ public record ReleaseDate
     [JsonPropertyName("region")]
     public RegionName RegionName { get; init; }
     
+    [JsonPropertyName("status")]
+    public int Status { get; init; }
+    
     [JsonPropertyName("updated_at")]
     [JsonConverter(typeof(Utils.DateTimeOffsetUnixJsonConverter))]
     public DateTimeOffset UpdatedAt { get; init; }
