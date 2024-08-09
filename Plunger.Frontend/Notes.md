@@ -18,6 +18,12 @@
     - 
 - /
 
+# 8/8/24
+
+- Fix currency box
+- Work on Collection view
+- Work on front page playlists
+
 
 need refresh, navigation, etc
 Misc thoughts on homepage

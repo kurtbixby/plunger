@@ -7,6 +7,7 @@ public class CollectionGame
     public int Id { get; set; }
     public DateTimeOffset TimeAdded { get; set; }
     public DateTimeOffset? TimeAcquired { get; set; }
+    public ulong? PurchasePrice { get; set; }
     public Physicality Physicality { get; set; }
     
     public int CollectionId { get; set; }

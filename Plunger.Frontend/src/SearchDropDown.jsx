@@ -24,7 +24,7 @@ function SearchDropDown(props) {
                 type={"text"}
                 value={value}
                 onClick={openDropDown}
-                onChange={(e) => onTextChange(e)}
+                onChange={e => onTextChange(e.target.value)}
             />
             <div>
                 {isOpen && (

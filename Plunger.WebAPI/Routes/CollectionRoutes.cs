@@ -62,10 +62,12 @@ public static class CollectionRoutes
         {
             var collection = await db.Collections.SingleAsync(c => c.UserId == userId);
 
+            var dateAcquired = req.TimeAcquired?.UtcDateTime.Date ?? req.TimeAcquired;
+
             var collectionGame = new CollectionGame()
             {
                 Collection = collection, GameId = req.GameId, PlatformId = req.PlatformId, RegionId = (int)req.Region,
-                Region = req.Region, TimeAdded = DateTimeOffset.UtcNow, TimeAcquired = req.TimeAcquired, Physicality = req.Physicality, VersionId = Guid.NewGuid()
+                Region = req.Region, TimeAdded = DateTimeOffset.UtcNow, TimeAcquired = dateAcquired, PurchasePrice = req.PurchasePrice, Physicality = req.Physicality, VersionId = Guid.NewGuid()
             };
 
             await db.CollectionGames.AddAsync(collectionGame);
@@ -74,7 +76,7 @@ public static class CollectionRoutes
             return Results.Ok(new
             {
                 collectionGame.Id, collectionGame.GameId, collectionGame.PlatformId, collectionGame.RegionId,
-                collectionGame.TimeAdded, collectionGame.TimeAcquired, collectionGame.Physicality, collectionGame.VersionId
+                collectionGame.TimeAdded, collectionGame.TimeAcquired, collectionGame.PurchasePrice, collectionGame.Physicality, collectionGame.VersionId
             });
         }
         catch (InvalidOperationException e)
