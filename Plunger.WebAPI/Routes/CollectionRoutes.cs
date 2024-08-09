@@ -12,23 +12,54 @@ public static class CollectionRoutes
     public static RouteGroupBuilder MapCollectionRoutes(this RouteGroupBuilder group)
     {
         group.MapPost("/users/{userid}/collection", AddToCollection).RequireAuthorization();
-        group.MapGet("/users/{userid}/collection", GetCollection);
+        group.MapGet("/users/{username}/collection", GetCollection);
         group.MapPatch("/users/{userid}/collection/{itemid}", EditCollection).RequireAuthorization();
         group.MapDelete("/users/{userid}/collection/{itemid}", DeleteFromCollection).RequireAuthorization();
 
         return group;
     }
 
-    private static IQueryable GetCollection([FromRoute] int userId, [FromServices] PlungerDbContext db)
+    private static GetCollectionResponse GetCollection([FromRoute] string username, [FromServices] PlungerDbContext db)
     {
-        return db.Collections.Select(
+        var collections = db.Collections.Select(
             c => new
             {
-                c.Id, c.UserId, Games = c.Games.Select(g => new
+                c.Id, c.User, Games = c.Games.Select(g => new CollectionResponseCollectionGame()
                 {
-                    g.Id, g.TimeAdded, g.TimeAcquired, g.Physicality, g.GameId, g.PlatformId, g.RegionId, g.VersionId
+                    Id = g.Id, TimeAdded = g.TimeAdded, TimeAcquired = g.TimeAcquired, Physicality = g.Physicality, PurchasePrice = g.PurchasePrice,
+                    Region = new CollectionResponseRegion()
+                    {
+                        Id = g.RegionId,
+                        Name = g.Region.ToString()
+                    },
+                    Platform = new CollectionResponsePlatform()
+                    {
+                        Id = g.PlatformId,
+                        Name = g.Platform.Name,
+                        AltName = g.Platform.AltName,
+                        Abbreviation = g.Platform.Abbreviation
+                    },
+                    Game = new CollectionResponseGame()
+                    {
+                        Id = g.Game.Id,
+                        Name = g.Game.Name,
+                        ShortName = g.Game.ShortName,
+                        CoverUrl = g.Game.Cover != null ? g.Game.Cover.Url : null
+                    }
                 })
-            }).Where(collection => collection.UserId == userId);
+            }).Where(collection => collection.User.Username == username);
+
+        var foo = collections.ToList();
+
+        return new GetCollectionResponse() { Games = collections.First().Games };
+        // return db.Collections.Select(
+        //     c => new
+        //     {
+        //         c.Id, c.UserId, Games = c.Games.Select(g => new
+        //         {
+        //             g.Id, g.TimeAdded, g.TimeAcquired, g.Physicality, g.GameId, g.PlatformId, g.RegionId, g.VersionId
+        //         })
+        //     }).Where(collection => collection.UserId == username);
     }
 
     private static async Task<IResult> AddToCollection(HttpContext httpContext, [FromRoute] int userId,

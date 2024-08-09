@@ -1,5 +1,5 @@
 using System.Text.Json.Serialization;
-using Plunger.Data.DbModels;
+using Plunger.Data.Enums;
 using Region = Plunger.Data.Enums.Region;
 
 namespace Plunger.WebApi.DtoModels;

@@ -1,4 +1,4 @@
-using Plunger.Data.DbModels;
+using Plunger.Data.Enums;
 
 namespace Plunger.WebApi.DtoModels;
 

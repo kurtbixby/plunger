@@ -22,9 +22,3 @@ public class CollectionGame
     public Platform Platform { get; set; }
 }
 
-public enum Physicality
-{
-    Unspecified = 0,
-    Physical = 1,
-    Digital = 2
-}
