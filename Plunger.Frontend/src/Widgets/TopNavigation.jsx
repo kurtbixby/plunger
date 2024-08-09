@@ -1,7 +1,7 @@
 import {useContext} from "react";
 import {Link} from "react-router-dom";
-import CurrentUserContext from "./CurrentUserContext.js";
-import LoginWidget from "./LoginWidget.jsx";
+import CurrentUserContext from "../CurrentUserContext";
+import LoginWidget from "./LoginWidget";
 
 function TopNavigation() {
     const [user, ] = useContext(CurrentUserContext);

@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
-import { objFromForm } from "./Utils.js";
-import API from "./APICalls.js";
-import CurrentUserContext from "./CurrentUserContext.js";
+import { objFromForm } from "../Utils.js";
+import API from "../APICalls.js";
+import CurrentUserContext from "../CurrentUserContext.js";
 
 function LoginWidget() {
     const [user, setUser] = useContext(CurrentUserContext);

@@ -1,8 +1,8 @@
 import {useContext, useEffect, useState, useRef, useReducer} from "react";
-import APICalls from "./APICalls.js";
-import CurrentUserContext from "./CurrentUserContext";
-import SearchDropDown from "./SearchDropDown";
-import WrappedSelect from "./WrappedSelect";
+import APICalls from "../APICalls.js";
+import CurrentUserContext from "../CurrentUserContext.js";
+import SearchDropDown from "../Components/SearchDropDown";
+import WrappedSelect from "../Components/WrappedSelect";
 import addGameReducer from "./addGameReducer.js";
 import currency from "currency.js";
 

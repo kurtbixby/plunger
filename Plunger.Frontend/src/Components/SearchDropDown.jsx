@@ -1,4 +1,4 @@
-import SearchDropDownItem from "./SearchDropDownItem.jsx";
+import SearchDropDownItem from "./SearchDropDownItem";
 import {useRef, useState} from "react";
 import {useOnClickOutside} from "usehooks-ts"; 
 

@@ -3,7 +3,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import CurrentUserContext from "./CurrentUserContext";
-import TopNavigation from "./TopNavigation";
+import TopNavigation from "./Widgets/TopNavigation";
 import HomePage from "./Pages/HomePage";
 import ProfilePage from "./Pages/ProfilePage";
 import CollectionPage from "./Pages/CollectionPage";

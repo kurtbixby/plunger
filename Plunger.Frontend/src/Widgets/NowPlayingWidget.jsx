@@ -1,9 +1,9 @@
 import { useContext, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import CurrentUserContext from "./CurrentUserContext";
-import CollapsibleListItem from "./CollapsibleListItem";
-import fetchNowPlaying from "./fetchNowPlaying";
-import SmallGameStatus from "./SmallGameStatus";
+import CurrentUserContext from "../CurrentUserContext";
+import CollapsibleListItem from "../Components/CollapsibleListItem";
+import fetchNowPlaying from "../Hooks/fetchNowPlaying";
+import SmallGameStatus from "../Components/SmallGameStatus";
 
 function NowPlayingWidget() {
   const [currentUser] = useContext(CurrentUserContext);
