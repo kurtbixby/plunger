@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Plunger.Data.DbModels;
 using Plunger.Data.IgdbAPIModels;
 using Platform = Plunger.Data.DbModels.Platform;
-using Region = Plunger.Data.Enums.Region;
+using Region = Plunger.Common.Enums.Region;
 using ReleaseDate = Plunger.Data.DbModels.ReleaseDate;
 
 namespace Plunger.Data.Utils;
@@ -67,10 +67,10 @@ public static class PlatformExtensions
 
 public static class RegionNameExtensions
 {
-    public static Enums.Region ToCommonEnum(this Data.IgdbAPIModels.RegionName region)
+    public static Region ToCommonEnum(this Data.IgdbAPIModels.RegionName region)
     {
-        var isDefined = Enum.IsDefined(typeof(Enums.Region), (int)region);
-        return isDefined ? RegionUtils.RegionForRegionName(region) : Enums.Region.Unknown;
+        var isDefined = Enum.IsDefined(typeof(Region), (int)region);
+        return isDefined ? RegionUtils.RegionForRegionName(region) : Region.Unknown;
     }
 }
 

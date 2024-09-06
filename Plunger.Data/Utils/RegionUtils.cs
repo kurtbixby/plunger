@@ -1,44 +1,46 @@
+using Plunger.Common.Enums;
+
 namespace Plunger.Data.Utils;
 
 public static class RegionUtils
 {
-    public static Enums.Region RegionForReleaseDate(IgdbAPIModels.ReleaseDate releaseDate)
+    public static Region RegionForReleaseDate(IgdbAPIModels.ReleaseDate releaseDate)
     {
         return RegionForRegionName(releaseDate.RegionName);
     }
 
-    public static Enums.Region RegionForRegionName(IgdbAPIModels.RegionName regionName)
+    public static Region RegionForRegionName(IgdbAPIModels.RegionName regionName)
     {
         return ExtRegionMapping[regionName];
     }
     
-    public static Enums.Region RegionForRatingBoard(IgdbAPIModels.RatingBoard ratingBoard)
+    public static Region RegionForRatingBoard(IgdbAPIModels.RatingBoard ratingBoard)
     {
         return ExtRatingBoardMapping[ratingBoard];
     }
 
-    private static readonly Dictionary<IgdbAPIModels.RegionName, Enums.Region> ExtRegionMapping = new()
+    private static readonly Dictionary<IgdbAPIModels.RegionName, Region> ExtRegionMapping = new()
     {
-        { IgdbAPIModels.RegionName.europe, Enums.Region.Europe },
-        { IgdbAPIModels.RegionName.north_america, Enums.Region.NorthAmerica },
-        { IgdbAPIModels.RegionName.australia, Enums.Region.Australia },
-        { IgdbAPIModels.RegionName.new_zealand, Enums.Region.NewZealand },
-        { IgdbAPIModels.RegionName.japan, Enums.Region.Japan },
-        { IgdbAPIModels.RegionName.china, Enums.Region.China },
-        { IgdbAPIModels.RegionName.asia, Enums.Region.Asia },
-        { IgdbAPIModels.RegionName.worldwide, Enums.Region.Unknown },
-        { IgdbAPIModels.RegionName.korea, Enums.Region.Korea },
-        { IgdbAPIModels.RegionName.brazil, Enums.Region.Brazil }
+        { IgdbAPIModels.RegionName.europe, Region.Europe },
+        { IgdbAPIModels.RegionName.north_america, Region.NorthAmerica },
+        { IgdbAPIModels.RegionName.australia, Region.Australia },
+        { IgdbAPIModels.RegionName.new_zealand, Region.NewZealand },
+        { IgdbAPIModels.RegionName.japan, Region.Japan },
+        { IgdbAPIModels.RegionName.china, Region.China },
+        { IgdbAPIModels.RegionName.asia, Region.Asia },
+        { IgdbAPIModels.RegionName.worldwide, Region.Unknown },
+        { IgdbAPIModels.RegionName.korea, Region.Korea },
+        { IgdbAPIModels.RegionName.brazil, Region.Brazil }
     };
     
-    private static readonly Dictionary<IgdbAPIModels.RatingBoard, Enums.Region> ExtRatingBoardMapping = new()
+    private static readonly Dictionary<IgdbAPIModels.RatingBoard, Region> ExtRatingBoardMapping = new()
     {
-        { IgdbAPIModels.RatingBoard.ESRB, Enums.Region.NorthAmerica },
-        { IgdbAPIModels.RatingBoard.PEGI, Enums.Region.Europe },
-        { IgdbAPIModels.RatingBoard.CERO, Enums.Region.Japan },
-        { IgdbAPIModels.RatingBoard.USK, Enums.Region.Germany },
-        { IgdbAPIModels.RatingBoard.GRAC, Enums.Region.Korea },
-        { IgdbAPIModels.RatingBoard.CLASS_IND, Enums.Region.Brazil },
-        { IgdbAPIModels.RatingBoard.ACB, Enums.Region.Australia },
+        { IgdbAPIModels.RatingBoard.ESRB, Region.NorthAmerica },
+        { IgdbAPIModels.RatingBoard.PEGI, Region.Europe },
+        { IgdbAPIModels.RatingBoard.CERO, Region.Japan },
+        { IgdbAPIModels.RatingBoard.USK, Region.Germany },
+        { IgdbAPIModels.RatingBoard.GRAC, Region.Korea },
+        { IgdbAPIModels.RatingBoard.CLASS_IND, Region.Brazil },
+        { IgdbAPIModels.RatingBoard.ACB, Region.Australia },
     };
 }

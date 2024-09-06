@@ -24,6 +24,36 @@
 - Work on Collection view
 - Work on front page playlists
 
+# 8/9/24
+
+- Add *Game Added* popup when done adding a game
+- Refresh "Recently Added" upon add
+
+# 8/12/24
+
+- Pagination to collection
+- Filters to collection
+
+# 8/14/24
+
+- Add privacy controls to collection view
+- Add edit state features
+- Login synchronously
+  - Add spinner/loading animation
+
+
+Recently Acquired
+- Sorted by date acquired descending
+Recently Started
+- Sorted by date started descending
+Now Playing
+- Sorted by date of recent update
+
+/api/lists/homepage
+/api/lists/{userid}/nowplaying
+/api/lists/{userid}/recentlyadded
+/api/lists/{userid}/recentlystarted
+
 
 need refresh, navigation, etc
 Misc thoughts on homepage

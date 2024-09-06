@@ -1,10 +1,11 @@
-namespace Plunger.WebApi.DtoModels;
+namespace Plunger.WebApi.EndpointContracts;
 
 public record ListUpdateRequest()
 {
     public record ListUpdate
     {
         public ListUpdateAction Action { get; init; }
+        
         // Can be a number
         public string Payload { get; init; }
     }

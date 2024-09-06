@@ -1,8 +1,8 @@
 using System.Text.Json.Serialization;
 using Plunger.Data.Enums;
-using Region = Plunger.Data.Enums.Region;
+using Region = Plunger.Common.Enums.Region;
 
-namespace Plunger.WebApi.DtoModels;
+namespace Plunger.WebApi.EndpointContracts;
 
 public record CollectionAddGameRequest()
 {

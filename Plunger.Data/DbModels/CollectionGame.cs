@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Plunger.Data.Enums;
 
 namespace Plunger.Data.DbModels;
@@ -13,11 +14,12 @@ public class CollectionGame
     public int CollectionId { get; set; }
     public int GameId { get; set; }
     public int PlatformId { get; set; }
-    public Enums.Region Region { get; set; }
+    public Common.Enums.Region Region { get; set; }
     public Guid VersionId { get; set; }
     
     public int RegionId { get; set; }
     public Game Game { get; set; }
+    [JsonIgnore]
     public Collection Collection { get; set; }
     public Platform Platform { get; set; }
 }

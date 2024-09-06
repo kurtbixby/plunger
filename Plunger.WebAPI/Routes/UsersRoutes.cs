@@ -4,6 +4,7 @@ using Plunger.Common;
 using Plunger.Data;
 using Plunger.Data.DbModels;
 using Plunger.WebApi.DtoModels;
+using Plunger.WebApi.EndpointContracts;
 
 namespace Plunger.WebApi.Routes;
 

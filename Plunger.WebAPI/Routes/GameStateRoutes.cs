@@ -2,7 +2,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Plunger.Data;
 using Plunger.Data.DbModels;
+using Plunger.Data.Enums;
 using Plunger.WebApi.DtoModels;
+using Plunger.WebApi.EndpointContracts;
 
 namespace Plunger.WebApi.Routes;
 
@@ -26,7 +28,7 @@ public static class GameStateRoutes
     }
 
     private static async Task<IResult> CreateGameState([FromServices] PlungerDbContext dbContext,
-        [FromRoute] int userId, [FromBody] NewGameStatusDto newGameReq)
+        [FromRoute] int userId, [FromBody] CreateGameStatusRequest createGameReq)
     {
 #warning TODO: Check for valid userid
         var user = await dbContext.Users.FindAsync(userId);
@@ -36,29 +38,31 @@ public static class GameStateRoutes
             return Results.BadRequest(new {Message = "Invalid user"});
         }
 #warning TODO: Check for valid game
-        var game = await dbContext.Games.FindAsync(newGameReq.GameId);
+        var game = await dbContext.Games.FindAsync(createGameReq.GameId);
         if (game == null)
         {
             // invalid game
             return Results.BadRequest(new {Message = "Invalid game"});
         }
 
-        var existingGame = await dbContext.GameStatuses.AnyAsync(e => e.UserId == userId && e.GameId == newGameReq.GameId);
+        var existingGame = await dbContext.GameStatuses.AnyAsync(e => e.UserId == userId && e.GameId == createGameReq.GameId);
         if (existingGame)
         {
-            return Results.Conflict(new {Message = $"Game status already exists for {game.Name} ({newGameReq.GameId})"});
+            return Results.Conflict(new {Message = $"Game status already exists for {game.Name} ({createGameReq.GameId})"});
         }
     
-        var gameId = newGameReq.GameId;
-        var completed = newGameReq.Completed ?? false;
+        var gameId = createGameReq.GameId;
+        var completed = createGameReq.Completed ?? false;
     
-        if (!newGameReq.PlayState.HasValue)
+        if (!createGameReq.PlayState.HasValue)
         {
 #warning TODO: Add logic for invalid playstate
             return Results.BadRequest();
         }
-        var status = new GameStatus() { UserId = userId,  GameId = gameId, Completed = completed, PlayState = (int)newGameReq.PlayState.Value, UpdatedAt = newGameReq.TimeStamp };
-        var stateChange = new PlayStateChange() { UpdatedAt = newGameReq.TimeStamp, NewState = (int)newGameReq.PlayState.Value, GameStatus = status};
+
+        var timeStarted = createGameReq.PlayState == PlayState.InProgress ? createGameReq.TimeStamp : (DateTimeOffset?)null;
+        var status = new GameStatus() { UserId = userId,  GameId = gameId, Completed = completed, PlayState = (int)createGameReq.PlayState.Value, UpdatedAt = createGameReq.TimeStamp, TimePlayed = TimeSpan.Zero, TimeStarted = timeStarted};
+        var stateChange = new PlayStateChange() { UpdatedAt = createGameReq.TimeStamp, NewState = (int)createGameReq.PlayState.Value, GameStatus = status, TimePlayed = TimeSpan.Zero};
         dbContext.GameStatuses.Add(status);
         dbContext.PlayStateChanges.Add(stateChange);
         await dbContext.SaveChangesAsync();
@@ -66,12 +70,12 @@ public static class GameStateRoutes
         return Results.Ok(new GameStatusResponse()
         {
             Id = status.Id, UserId = status.UserId, Completed = status.Completed, PlayState = status.PlayState,
-            UpdatedAt = status.UpdatedAt, Name = status.Game.Name, ShortName = status.Game.ShortName
+            UpdatedAt = status.UpdatedAt, Name = status.Game.Name, ShortName = status.Game.ShortName, TimePlayed = status.TimePlayed, TimeStarted = status.TimeStarted
         });
     }
 
     private static async Task<IResult> EditGameState(HttpContext httpContext, [FromServices] PlungerDbContext dbContext,
-        [FromRoute] int userId, [FromRoute] int gameId, [FromBody] UpdateGameStatusDto updateGameReq)
+        [FromRoute] int userId, [FromRoute] int gameId, [FromBody] UpdateGameStatusRequest updateGameReq)
     {
         var status = await dbContext.GameStatuses.Include(e => e.Game).FirstAsync(e => e.UserId == userId && e.GameId == gameId);
         if (updateGameReq.TimeStamp < status.UpdatedAt)
@@ -79,16 +83,21 @@ public static class GameStateRoutes
             return Results.BadRequest(new { Message = "Time stamp older than current time stamp" });
         }
 
+        if (updateGameReq.PlayState == PlayState.InProgress)
+        {
+            status.TimeStarted = updateGameReq.TimeStamp;
+        }
         status.PlayState = (int)updateGameReq.PlayState;
         status.UpdatedAt = updateGameReq.TimeStamp;
+        status.TimePlayed = updateGameReq.TimePlayed;
         var newStateChange = new PlayStateChange()
-            { UpdatedAt = updateGameReq.TimeStamp, NewState = (int)updateGameReq.PlayState, GameStatusId = status.Id };
+            { UpdatedAt = updateGameReq.TimeStamp, NewState = (int)updateGameReq.PlayState, GameStatusId = status.Id, TimePlayed = updateGameReq.TimePlayed};
         await dbContext.PlayStateChanges.AddAsync(newStateChange);
         await dbContext.SaveChangesAsync();
     
         return Results.Ok(new GameStatusResponse()
         {
-            Id = status.Id, UserId = status.UserId, Completed = status.Completed, PlayState = status.PlayState,
+            Id = status.Id, UserId = status.UserId, Completed = status.Completed, PlayState = status.PlayState, TimePlayed = status.TimePlayed, TimeStarted = status.TimeStarted,
             UpdatedAt = status.UpdatedAt, Name = status.Game.Name, ShortName = status.Game.ShortName
         });
     }

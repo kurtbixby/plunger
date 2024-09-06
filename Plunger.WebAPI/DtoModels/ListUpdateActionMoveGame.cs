@@ -1,6 +1,6 @@
 namespace Plunger.WebApi;
 
-public record ListActionMoveGame()
+public record ListUpdateActionMoveGame()
 {
     public int GameId { get; init; }
     public int SourceNumber { get; init; }

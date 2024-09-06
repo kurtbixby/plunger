@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using Plunger.Data;
 using Plunger.Data.DbModels;
 using Plunger.WebApi.DtoModels;
+using Plunger.WebApi.DataLayer;
+using Plunger.WebApi.EndpointContracts;
 
 namespace Plunger.WebApi.Routes;
 
@@ -14,8 +16,31 @@ public static class ListRoutes
         group.MapPost("/lists/", CreateList).RequireAuthorization();
         group.MapGet("/lists/{listId}", GetList);
         group.MapPatch("/lists/{listId}", EditList).RequireAuthorization();
+        
+        // Special list endpoints
+        group.MapGet("/lists/homepage", GetHomePageLists).RequireAuthorization();
+        // group.MapGet("/lists/{userid}/nowplaying", GetNowPlayingList).RequireAuthorization();
+        // group.MapGet("/lists/{userid}/recentlyadded", GetRecentlyAddedList).RequireAuthorization();
+        // group.MapGet("/lists/{userid}/recentlystarted", GetRecentlyStartedList).RequireAuthorization();
 
         return group;
+    }
+
+    private static async Task<IResult> GetHomePageLists(HttpContext httpContext, [FromServices] PlungerDbContext db)
+    {
+        var userDetails = TokenUtils.GetUserDetailsFromClaims(httpContext);
+        if (userDetails.UserId == "" || userDetails.UserName == "")
+        {
+            return Results.Problem();
+        }
+
+        int.TryParse(userDetails.UserId, out var userId);
+
+        var nowPlayList = await ListFetching.RetrieveNowPlayingList(userId, db);
+        var recentStartedList = await ListFetching.RetrieveRecentlyStartedList(userId, db);
+        var recentAddList = await ListFetching.RetrieveRecentlyAcquiredList(userId, db);
+
+        return Results.Ok(new { NowPlaying = nowPlayList, RecentlyStarted = recentStartedList, RecentlyAcquired = recentAddList });
     }
 
     private static async Task<IResult> CreateList([FromBody] NewListRequest req, [FromServices] PlungerDbContext db)
@@ -52,83 +77,83 @@ public static class ListRoutes
         [FromServices] PlungerDbContext dbContext, [FromRoute] int listId)
     {
         var validation = request.Validate();
-    if (!validation.IsValid)
-    {
-        return Results.BadRequest(validation.ValidationErrors);
-    }
-
-    var fetchList = await dbContext.GameLists.Include(e => e.GameListEntries).Where(e => e.Id == listId).ToListAsync();
-    if (fetchList.Count == 0)
-    {
-        return Results.NotFound(new { Message = "List not found" });
-    }
-
-    var list = fetchList[0];
-
-    if (request.VersionId.CompareTo(list.VersionId) != 0)
-    {
-        return Results.BadRequest(new { Message = "Invalid version of the list" });
-    }
-    
-    var error = false;
-    request.Updates.ForEach((e) =>
-    {
-        if (!error)
+        if (!validation.IsValid)
         {
-            switch (e.Action)
-            {
-                case ListUpdateRequest.ListUpdateAction.ChangeName:
-                    list.Name = e.Payload;
-                    break;
-                case ListUpdateRequest.ListUpdateAction.ChangeOrdered:
-                    list.Unordered = Convert.ToBoolean(e.Payload);
-                    break;
-                case ListUpdateRequest.ListUpdateAction.AddGame:
-                    var gameId = Convert.ToInt32(e.Payload);
-
-                    var listEntry = new GameListEntry()
-                        { GameId = gameId, GameList = list, Number = list.GameListEntries.Count };
-                    list.GameListEntries.Add(listEntry);
-                    break;
-                case ListUpdateRequest.ListUpdateAction.RemoveGame:
-                    var gameNumber = Convert.ToInt32(e.Payload);
-                    if (list.GameListEntries.Count <= gameNumber)
-                    {
-                        error = error || true;
-                        break;
-                    }
-                    list.GameListEntries.RemoveAt(gameNumber);
-                    break;
-                case ListUpdateRequest.ListUpdateAction.MoveGame:
-                    var moveAction = JsonSerializer.Deserialize<ListActionMoveGame>(e.Payload);
-
-                    if (list.GameListEntries.Count <= moveAction.SourceNumber)
-                    {
-                        error = error || true;
-                        break;
-                    }
-
-                    if (list.GameListEntries[moveAction.SourceNumber].GameId != moveAction.GameId)
-                    {
-                        error = error || true;
-                        break;
-                    }
-
-                    var entry = list.GameListEntries[moveAction.SourceNumber];
-                    list.GameListEntries.RemoveAt(moveAction.SourceNumber);
-                    list.GameListEntries.Insert(moveAction.DestinationNumber, entry);
-                    break;
-            }
+            return Results.BadRequest(validation.ValidationErrors);
         }
-    });
-    if (error)
-    {
-        return Results.BadRequest(new { Message = "Error processing updates list"});
-    }
 
-    list.VersionId = Guid.NewGuid();
-    await dbContext.SaveChangesAsync();
-    
-    return Results.Ok(new { });
+        var fetchList = await dbContext.GameLists.Include(e => e.GameListEntries).Where(e => e.Id == listId).ToListAsync();
+        if (fetchList.Count == 0)
+        {
+            return Results.NotFound(new { Message = "List not found" });
+        }
+
+        var list = fetchList[0];
+
+        if (request.VersionId.CompareTo(list.VersionId) != 0)
+        {
+            return Results.BadRequest(new { Message = "Invalid version of the list" });
+        }
+        
+        var error = false;
+        request.Updates.ForEach((e) =>
+        {
+            if (!error)
+            {
+                switch (e.Action)
+                {
+                    case ListUpdateRequest.ListUpdateAction.ChangeName:
+                        list.Name = e.Payload;
+                        break;
+                    case ListUpdateRequest.ListUpdateAction.ChangeOrdered:
+                        list.Unordered = Convert.ToBoolean(e.Payload);
+                        break;
+                    case ListUpdateRequest.ListUpdateAction.AddGame:
+                        var gameId = Convert.ToInt32(e.Payload);
+
+                        var listEntry = new GameListEntry()
+                            { GameId = gameId, GameList = list, Number = list.GameListEntries.Count };
+                        list.GameListEntries.Add(listEntry);
+                        break;
+                    case ListUpdateRequest.ListUpdateAction.RemoveGame:
+                        var gameNumber = Convert.ToInt32(e.Payload);
+                        if (list.GameListEntries.Count <= gameNumber)
+                        {
+                            error = error || true;
+                            break;
+                        }
+                        list.GameListEntries.RemoveAt(gameNumber);
+                        break;
+                    case ListUpdateRequest.ListUpdateAction.MoveGame:
+                        var moveAction = JsonSerializer.Deserialize<ListUpdateActionMoveGame>(e.Payload);
+
+                        if (list.GameListEntries.Count <= moveAction.SourceNumber)
+                        {
+                            error = error || true;
+                            break;
+                        }
+
+                        if (list.GameListEntries[moveAction.SourceNumber].GameId != moveAction.GameId)
+                        {
+                            error = error || true;
+                            break;
+                        }
+
+                        var entry = list.GameListEntries[moveAction.SourceNumber];
+                        list.GameListEntries.RemoveAt(moveAction.SourceNumber);
+                        list.GameListEntries.Insert(moveAction.DestinationNumber, entry);
+                        break;
+                }
+            }
+        });
+        if (error)
+        {
+            return Results.BadRequest(new { Message = "Error processing updates list"});
+        }
+
+        list.VersionId = Guid.NewGuid();
+        await dbContext.SaveChangesAsync();
+        
+        return Results.Ok(new { });
     }
 }

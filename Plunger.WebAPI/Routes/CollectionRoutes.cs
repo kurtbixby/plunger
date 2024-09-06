@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Plunger.Data;
 using Plunger.Data.DbModels;
+using Plunger.Data.Enums;
 using Plunger.WebApi.DtoModels;
+using Plunger.WebApi.EndpointContracts;
 
 namespace Plunger.WebApi.Routes;
 
@@ -30,7 +32,8 @@ public static class CollectionRoutes
                     Region = new CollectionResponseRegion()
                     {
                         Id = g.RegionId,
-                        Name = g.Region.ToString()
+                        // Technically this name is not correct and it should grab from the database
+                        Name = EnumStrings.RegionNames[(int)g.Region]
                     },
                     Platform = new CollectionResponsePlatform()
                     {

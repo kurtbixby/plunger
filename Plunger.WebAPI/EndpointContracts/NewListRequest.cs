@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
-namespace Plunger.WebApi.DtoModels;
+
+namespace Plunger.WebApi.EndpointContracts;
 
 public class NewListRequest
 {

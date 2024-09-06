@@ -51,7 +51,7 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/:userName" element={<ProfilePage />} />
             <Route path="/:userName/collection" element={<CollectionPage />} />
-            <Route path="/:userName/lists" element={<ListsPage />} />
+            {/*<Route path="/:userName/lists" element={<ListsPage />} />*/}
           </Routes>
         </CurrentUserContext.Provider>
       </QueryClientProvider>

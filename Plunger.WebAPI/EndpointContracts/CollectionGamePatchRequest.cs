@@ -1,6 +1,6 @@
 using Plunger.Data.Enums;
 
-namespace Plunger.WebApi.DtoModels;
+namespace Plunger.WebApi.EndpointContracts;
 
 public record CollectionGamePatchRequest()
 {

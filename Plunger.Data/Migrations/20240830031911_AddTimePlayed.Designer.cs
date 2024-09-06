@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Plunger.Data;
@@ -11,9 +12,11 @@ using Plunger.Data;
 namespace Plunger.Data.Migrations
 {
     [DbContext(typeof(PlungerDbContext))]
-    partial class PlungerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240830031911_AddTimePlayed")]
+    partial class AddTimePlayed
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -259,9 +262,6 @@ namespace Plunger.Data.Migrations
 
                     b.Property<TimeSpan>("TimePlayed")
                         .HasColumnType("interval");
-
-                    b.Property<DateTimeOffset?>("TimeStarted")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");

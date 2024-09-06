@@ -7,7 +7,7 @@ public class ReleaseDate
     public Enums.DateFormat DateFormat { get; set; }
     public int PlatformId { get; set; }
     public Platform Platform { get; set; }
-    public Enums.Region Region { get; set; }
+    public Common.Enums.Region Region { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
     public Guid Checksum { get; set; }
 }

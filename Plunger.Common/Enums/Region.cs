@@ -1,4 +1,4 @@
-namespace Plunger.Data.Enums;
+namespace Plunger.Common.Enums;
 
 public enum Region
 {

@@ -8,24 +8,23 @@ function TopNavigation() {
     
   return (
     <header>
-        {!user.loggedIn ? <LoginWidget/>
-            : <>
-                <h1>Time to clear your backlog {user.userName}!</h1>
-                <nav>
-                    <ul>
-                        <li>
-                            <Link to={"/" + user.userName}>My Profile</Link>
-                        </li>
-                        <li>
-                            <Link to={"/" + user.userName + "/collection"}>Collection</Link>
-                        </li>
-                        <li>
-                            <Link to={"/" + user.userName + "/lists"}>Lists</Link>
-                        </li>
-                    </ul>
-                </nav>
-            </>
-        }
+        <nav>
+            <Link to={"/"}>Home</Link>
+            {!user.loggedIn ? <LoginWidget/> :
+            <ul>
+                <li>
+                    <Link to={"/" + user.userName}>My Profile</Link>
+                </li>
+                <li>
+                    <Link to={"/" + user.userName + "/collection"}>Collection</Link>
+                </li>
+                <li>
+                    <Link to={"/" + user.userName + "/lists"}>Lists</Link>
+                </li>
+            </ul>
+            }
+        </nav>
+        {user.loggedIn && <h1>Time to clear your backlog {user.userName}!</h1>}
     </header>
   );
 }

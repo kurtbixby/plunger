@@ -1,9 +1,9 @@
 using System.Text.Json.Serialization;
 using Plunger.Data.Enums;
 
-namespace Plunger.WebApi.DtoModels;
+namespace Plunger.WebApi.EndpointContracts;
 
-public record NewGameStatusDto()
+public record CreateGameStatusRequest()
 {
     [JsonPropertyName("gameid")] public int GameId { get; init; }
     [JsonPropertyName("timestamp")] public DateTimeOffset TimeStamp  { get; init; }

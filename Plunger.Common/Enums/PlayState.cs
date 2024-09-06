@@ -2,8 +2,9 @@ namespace Plunger.Data.Enums;
 
 public enum PlayState
 {
-    Unplayed = 0,
-    InProgress = 1,
-    Completed = 2,
-    Paused = 3,
+    Unspecified = 0,
+    Unplayed = 1,
+    InProgress = 2,
+    Completed = 3,
+    Paused = 4,
 }
