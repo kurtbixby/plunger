@@ -5,9 +5,11 @@ import SearchDropDown from "../Components/SearchDropDown";
 import WrappedSelect from "../Components/WrappedSelect";
 import addGameReducer from "./addGameReducer.js";
 import currency from "currency.js";
+import {useCurrentUser} from "../CurrentUserProvider.jsx";
 
 function AddGameWidget() {
-  const [currentUser] = useContext(CurrentUserContext);
+  // const [currentUser] = useContext(CurrentUserContext);
+    const { state: {user: currentUser} } = useCurrentUser();
   const [formState, dispatch] = useReducer(addGameReducer, {
       game: {},
       gameName: "",

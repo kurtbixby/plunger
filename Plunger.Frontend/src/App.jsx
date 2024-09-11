@@ -10,6 +10,7 @@ import CollectionPage from "./Pages/CollectionPage";
 import ListsPage from "./Pages/ListsPage";
 import TokenManagement from "./TokenManagement";
 import APICalls from "./APICalls.js";
+import {CurrentUserProvider} from "./CurrentUserProvider.jsx";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -44,7 +45,8 @@ function App() {
   return (
     <BrowserRouter>
       <QueryClientProvider client={queryClient}>
-        <CurrentUserContext.Provider value={[userState, setUserState]}>
+        {/*<CurrentUserContext.Provider value={[userState, setUserState]}>*/}
+        <CurrentUserProvider>
           <TopNavigation />
           
           <Routes>
@@ -53,7 +55,8 @@ function App() {
             <Route path="/:userName/collection" element={<CollectionPage />} />
             {/*<Route path="/:userName/lists" element={<ListsPage />} />*/}
           </Routes>
-        </CurrentUserContext.Provider>
+        </CurrentUserProvider>
+        {/*</CurrentUserContext.Provider>*/}
       </QueryClientProvider>
     </BrowserRouter>
   );

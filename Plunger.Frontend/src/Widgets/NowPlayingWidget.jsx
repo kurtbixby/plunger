@@ -4,13 +4,15 @@ import CurrentUserContext from "../CurrentUserContext";
 import CollapsibleListItem from "../Components/CollapsibleListItem";
 import fetchNowPlaying from "../Hooks/fetchNowPlaying";
 import SmallGameStatus from "../Components/SmallGameStatus";
+import {useCurrentUser} from "../CurrentUserProvider.jsx";
 
 function NowPlayingWidget() {
-  const [currentUser] = useContext(CurrentUserContext);
+  // const [currentUser] = useContext(CurrentUserContext);
+  const { state: { user: currentUser } } = useCurrentUser();
   const [openedItemId, setOpenedItemId] = useState(NaN);
 
   const results = useQuery({
-    queryKey: ["nowPlaying", currentUser],
+    queryKey: ["nowPlaying", currentUser === null ? 0 : currentUser.userId],
     queryFn: fetchNowPlaying,
   });
 

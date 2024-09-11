@@ -1,16 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
 import fetchHomePageLists from "../Hooks/fetchHomePageLists";
 import SmallList from "../Components/SmallList";
-import { useContext } from "react";
-import CurrentUserContext from "../CurrentUserContext";
 import AddGameWidget from "../Widgets/AddGameWidget";
 import NowPlayingWidget from "../Widgets/NowPlayingWidget";
+import {useCurrentUser} from "../CurrentUserProvider.jsx";
+
+import { useContext } from "react";
+import CurrentUserContext from "../CurrentUserContext";
 
 function HomePage() {
-  const [currentUser] = useContext(CurrentUserContext);
+  // const [currentUser] = useContext(CurrentUserContext);
+    const { state: { user: currentUser } } = useCurrentUser();
 
   const results = useQuery({
-    queryKey: ["homePageLists", currentUser],
+    queryKey: ["homePageLists", currentUser === null ? 0 : currentUser.userId],
     queryFn: fetchHomePageLists,
   });
   const lists = results?.data ?? [];

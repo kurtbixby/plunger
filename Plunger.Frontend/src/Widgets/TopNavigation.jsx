@@ -2,15 +2,17 @@ import {useContext} from "react";
 import {Link} from "react-router-dom";
 import CurrentUserContext from "../CurrentUserContext";
 import LoginWidget from "./LoginWidget";
+import {useCurrentUser} from "../CurrentUserProvider.jsx";
 
 function TopNavigation() {
-    const [user, ] = useContext(CurrentUserContext);
+    // const [user, ] = useContext(CurrentUserContext);
+    const { state: {isLoggedIn, isLoading, user} } = useCurrentUser();
     
   return (
     <header>
         <nav>
             <Link to={"/"}>Home</Link>
-            {!user.loggedIn ? <LoginWidget/> :
+            {!isLoggedIn ? <LoginWidget/> :
             <ul>
                 <li>
                     <Link to={"/" + user.userName}>My Profile</Link>
@@ -24,7 +26,7 @@ function TopNavigation() {
             </ul>
             }
         </nav>
-        {user.loggedIn && <h1>Time to clear your backlog {user.userName}!</h1>}
+        {isLoggedIn && <h1>Time to clear your backlog {user.username}!</h1>}
     </header>
   );
 }
