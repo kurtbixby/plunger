@@ -1,9 +1,6 @@
 import {useParams} from "react-router-dom";
-import {useContext} from "react";
-import CurrentUserContext from "../CurrentUserContext";
 
 function ProfilePage() {
-    const [currentUser, ] = useContext(CurrentUserContext);
     const { userName } = useParams();
     
     return (

@@ -1,6 +1,5 @@
-import {useContext, useEffect, useState, useRef, useReducer} from "react";
+import {useEffect, useState, useRef, useReducer} from "react";
 import APICalls from "../APICalls.js";
-import CurrentUserContext from "../CurrentUserContext.js";
 import SearchDropDown from "../Components/SearchDropDown";
 import WrappedSelect from "../Components/WrappedSelect";
 import addGameReducer from "./addGameReducer.js";
@@ -8,7 +7,6 @@ import currency from "currency.js";
 import {useCurrentUser} from "../CurrentUserProvider.jsx";
 
 function AddGameWidget() {
-  // const [currentUser] = useContext(CurrentUserContext);
     const { state: {user: currentUser} } = useCurrentUser();
   const [formState, dispatch] = useReducer(addGameReducer, {
       game: {},
@@ -19,6 +17,7 @@ function AddGameWidget() {
       version: "",
       price: NaN,
       priceString: "",
+      searchField: "",
       tangibility: "",
       region: "",
       dateAcquired: todaysDateString(),

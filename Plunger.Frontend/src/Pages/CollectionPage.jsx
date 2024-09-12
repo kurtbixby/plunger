@@ -1,12 +1,10 @@
 import {useParams} from "react-router-dom";
-import {useContext, useEffect, useState} from "react";
-import CurrentUserContext from "../CurrentUserContext";
+import {useEffect, useState} from "react";
 import APICalls from "../APICalls.js";
 import Enums from "../Enums.js";
 import { dateFormat, formatCurrency } from "../Utils.js";
 
 function CollectionPage() {
-    const [currentUser, ] = useContext(CurrentUserContext);
     const { userName } = useParams();
     
     const [collectionResults, setCollectionResults] = useState([]);

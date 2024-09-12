@@ -1,11 +1,9 @@
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { objFromForm } from "../Utils.js";
 import API from "../APICalls.js";
-import CurrentUserContext from "../CurrentUserContext.js";
-import {useCurrentUser} from "../CurrentUserProvider.jsx";
+import { useCurrentUser } from "../CurrentUserProvider.jsx";
 
 function LoginWidget() {
-    // const [user, setUser] = useContext(CurrentUserContext);
     const { dispatch: userDispatch } = useCurrentUser(); 
     
     const [state, setState] = useState({

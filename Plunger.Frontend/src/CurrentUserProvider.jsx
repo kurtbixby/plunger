@@ -1,4 +1,6 @@
-import {createContext, useContext, useReducer, useState} from "react";
+import {createContext, useContext, useReducer, useEffect} from "react";
+import TokenManagement from "./TokenManagement.js";
+import APICalls from "./APICalls.js";
 
 const UserContext = createContext(null);
 
@@ -33,12 +35,33 @@ function currentUserReducer(state, action) {
     }
 }
 
-function CurrentUserProvider({children}) {
-    const [state, dispatch] = useReducer(currentUserReducer, {
+function CurrentUserProvider({initialState, children}) {
+    const [state, dispatch] = useReducer(currentUserReducer, initialState ?? {
         isLoggedIn: false,
         isLoading: false,
         user: null
     });
+
+    useEffect(() => {
+        (async () => await initializeUser())();
+    }, []);
+
+    async function initializeUser() {
+        const storedToken = TokenManagement.loadToken();
+        if (storedToken === null) {
+            return;
+        }
+
+        dispatch({type: 'sendLoginRequest'})
+        const userDetails = await APICalls.sendTokenLoginRequest(storedToken);
+        if (!userDetails) {
+            dispatch({type: 'loginFailed'})
+            return;
+        }
+        dispatch({type: 'loginSucceeded', payload: {username: userDetails.userName, userId: userDetails.userId}});
+
+        // setUserState({isLoggedIn: true, isLoading: false, user: {username: userDetails.userName, userId: userDetails.userId}});
+    }
     
     const contextObject = {state, dispatch};
     return <UserContext.Provider value={contextObject}>{children}</UserContext.Provider>;

@@ -1,6 +1,4 @@
-import {useContext} from "react";
 import {Link} from "react-router-dom";
-import CurrentUserContext from "../CurrentUserContext";
 import LoginWidget from "./LoginWidget";
 import {useCurrentUser} from "../CurrentUserProvider.jsx";
 

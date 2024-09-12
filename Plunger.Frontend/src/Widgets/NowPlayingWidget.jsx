@@ -1,13 +1,11 @@
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import CurrentUserContext from "../CurrentUserContext";
 import CollapsibleListItem from "../Components/CollapsibleListItem";
 import fetchNowPlaying from "../Hooks/fetchNowPlaying";
 import SmallGameStatus from "../Components/SmallGameStatus";
-import {useCurrentUser} from "../CurrentUserProvider.jsx";
+import { useCurrentUser } from "../CurrentUserProvider.jsx";
 
 function NowPlayingWidget() {
-  // const [currentUser] = useContext(CurrentUserContext);
   const { state: { user: currentUser } } = useCurrentUser();
   const [openedItemId, setOpenedItemId] = useState(NaN);
 
@@ -17,7 +15,7 @@ function NowPlayingWidget() {
   });
 
   function toggleItem(itemId) {
-    if (itemId != openedItemId) {
+    if (itemId !== openedItemId) {
       setOpenedItemId(itemId);
     } else {
       setOpenedItemId(NaN);
@@ -39,7 +37,7 @@ function NowPlayingWidget() {
             key={game.id}
             title={game.name}
             id={game.id}
-            isOpen={game.id == openedItemId}
+            isOpen={game.id === openedItemId}
             toggleItem={toggleItem}
           >
             <SmallGameStatus game={game} />
