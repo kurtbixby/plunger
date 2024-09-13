@@ -40,7 +40,7 @@ public static class ListRoutes
         var recentStartedList = await ListFetching.RetrieveRecentlyStartedList(userId, db);
         var recentAddList = await ListFetching.RetrieveRecentlyAcquiredList(userId, db);
 
-        return Results.Ok(new { NowPlaying = nowPlayList, RecentlyStarted = recentStartedList, RecentlyAcquired = recentAddList });
+        return Results.Ok(new List<UserListDto> {nowPlayList, recentStartedList, recentAddList});
     }
 
     private static async Task<IResult> CreateList([FromBody] NewListRequest req, [FromServices] PlungerDbContext db)

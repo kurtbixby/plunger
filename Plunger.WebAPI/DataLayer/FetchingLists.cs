@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Plunger.Common.Enums;
 using Plunger.Data;
 using Plunger.Data.DbModels;
 using Plunger.Data.Enums;
@@ -9,14 +10,15 @@ namespace Plunger.WebApi.DataLayer;
 
 public static class ListFetching
 {
-    public static async Task<List<GameStatusListEntryDto>> RetrieveNowPlayingList(int userId, PlungerDbContext dbContext)
+    public static async Task<UserListDto> RetrieveNowPlayingList(int userId, PlungerDbContext dbContext)
     {
         var incompleteResponses =
             (await dbContext.Users.Include(user => user.GameStatuses).ThenInclude(gs => gs.Game)
                 .ThenInclude(game => game.Cover)
                 .FirstAsync(user => user.Id == userId)).GameStatuses.Where(gs => gs.PlayState == (int)PlayState.InProgress)
-            .OrderByDescending(gs => gs.UpdatedAt).Take(10).Select(gs => new GameStatusListEntryDto()
+            .OrderByDescending(gs => gs.UpdatedAt).Take(10).Select(gs => new ListEntryDto()
             {
+                Id = gs.Game.Id,
                 Game = new GameDto()
                 {
                     Id = gs.Game.Id,
@@ -36,18 +38,27 @@ public static class ListFetching
         
         // Find CollectionGames from GameStatus
         var filledResponses = FillResponseWithCollectionGames(incompleteResponses.ToList(), userId, dbContext);
+
+        var list = new UserListDto
+        {
+            Id = (int)ListType.NowPlaying,
+            Name = "Now Playing",
+            Type = ListType.NowPlaying,
+            ListEntries = filledResponses,
+        };
         
-        return filledResponses.ToList();
+        return list;
     }
 
     // Change this to return a list of game statuses
     // Use top 10 ids to join on gamestatus.gameid
     // create default status for those without any???
-    public static async Task<List<CollectionListEntryDto>> RetrieveRecentlyAcquiredList(int userId, PlungerDbContext dbContext)
+    public static async Task<UserListDto> RetrieveRecentlyAcquiredList(int userId, PlungerDbContext dbContext)
     {
         var collectionGames = (await dbContext.Users.Include(u => u.Collection).ThenInclude(c => c.Games).ThenInclude(g => g.Game)
-            .FirstAsync(user => user.Id == userId)).Collection.Games.OrderByDescending(g => g.TimeAcquired).ThenByDescending(g => g.TimeAdded).Take(10).Select(cg => new CollectionListEntryDto
+            .FirstAsync(user => user.Id == userId)).Collection.Games.OrderByDescending(g => g.TimeAcquired).ThenByDescending(g => g.TimeAdded).Take(10).Select(cg => new ListEntryDto
         {
+            Id = cg.Id,
             Game = new GameDto
             {
                 Id = cg.GameId,
@@ -55,16 +66,19 @@ public static class ListFetching
                 ShortName = cg.Game.ShortName,
                 CoverUrl = cg.Game.Cover?.Url ?? ""
             },
-            CollectionEntry = new CollectionGameDto()
-            {
-                Id = cg.Id,
-                TimeAdded = cg.TimeAdded,
-                TimeAcquired = cg.TimeAcquired,
-                PurchasePrice = cg.PurchasePrice,
-                Physicality = cg.Physicality,
-                PlatformId = cg.PlatformId,
-                RegionId = cg.RegionId,
-            },
+            CollectionEntries =
+            [
+                new CollectionGameDto
+                {
+                    Id = cg.Id,
+                    TimeAdded = cg.TimeAdded,
+                    TimeAcquired = cg.TimeAcquired,
+                    PurchasePrice = cg.PurchasePrice,
+                    Physicality = cg.Physicality,
+                    PlatformId = cg.PlatformId,
+                    RegionId = cg.RegionId,
+                }
+            ],
         }).ToList();
         
         // Find GameStatus from CollectionGame
@@ -87,17 +101,26 @@ public static class ListFetching
         {
             entry.Status = statuses[entry.Game.Id];
         }
+
+        var list = new UserListDto
+        {
+            Id = (int)ListType.RecentlyAcquired,
+            Name = "Recently Acquired",
+            Type = ListType.RecentlyAcquired,
+            ListEntries = collectionGames.ToList(),
+        };
         
-        return collectionGames.ToList();
+        return list;
     }
 
     #warning TODO: Refactor this into a single SQL query
-    public static async Task<List<GameStatusListEntryDto>> RetrieveRecentlyStartedList(int userId, PlungerDbContext dbContext)
+    public static async Task<UserListDto> RetrieveRecentlyStartedList(int userId, PlungerDbContext dbContext)
     {
         var incompleteResponses = (await dbContext.Users.Include(u => u.GameStatuses).ThenInclude(gs => gs.Game)
                 .ThenInclude(g => g.Cover).FirstAsync(u => u.Id == userId))
-            .GameStatuses.Where(gs => gs.PlayState == (int)PlayState.InProgress).Take(10).Select(gs => new GameStatusListEntryDto()
+            .GameStatuses.Where(gs => gs.PlayState == (int)PlayState.InProgress).Take(10).Select(gs => new ListEntryDto()
             {
+                Id = gs.Game.Id,
                 Game = new GameDto()
                 {
                     Id = gs.Game.Id,
@@ -116,11 +139,19 @@ public static class ListFetching
             });
 
         var filledResponses = FillResponseWithCollectionGames(incompleteResponses.ToList(), userId, dbContext);
+
+        var list = new UserListDto
+        {
+            Id = (int)ListType.RecentlyStarted,
+            Name = "Recently Started",
+            Type = ListType.RecentlyStarted,
+            ListEntries = filledResponses,
+        };
         
-        return filledResponses.ToList();
+        return list;
     }
 
-    private static List<GameStatusListEntryDto> FillResponseWithCollectionGames(List<GameStatusListEntryDto> partiallyFiledResponses, int userId, PlungerDbContext dbContext)
+    private static List<ListEntryDto> FillResponseWithCollectionGames(List<ListEntryDto> partiallyFiledResponses, int userId, PlungerDbContext dbContext)
     {
         var gameIds = partiallyFiledResponses.Select(gs => gs.Game.Id);
         var collectionGameDict = dbContext.CollectionGames.Include(cg => cg.Collection)
