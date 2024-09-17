@@ -19,14 +19,11 @@ function UserHomePage() {
         {isLoggedIn && <>
           <div className="grid grid-cols-2 gap-3">
             <AddGameWidget />
-            <NowPlayingWidget />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
             {console.log(lists)}
             {!lists.length ? (
               <h1>No Lists</h1>
             ) : (
-              lists.map((list) => <SmallList key={list.id} list={list} />)
+              lists.map((list) => list.type === 1 ? <NowPlayingWidget key={list.id} list={list}/> : <SmallList key={list.id} list={list} />)
             )}
           </div>
         </>}

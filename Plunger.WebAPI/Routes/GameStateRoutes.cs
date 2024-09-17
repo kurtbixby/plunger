@@ -83,7 +83,7 @@ public static class GameStateRoutes
             return Results.BadRequest(new { Message = "Time stamp older than current time stamp" });
         }
 
-        if (updateGameReq.PlayState == PlayState.InProgress)
+        if ((status.PlayState == (int)PlayState.Unplayed || status.PlayState == (int)PlayState.Unspecified) && updateGameReq.PlayState == PlayState.InProgress)
         {
             status.TimeStarted = updateGameReq.TimeStamp;
         }

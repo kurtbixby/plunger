@@ -5,6 +5,7 @@ namespace Plunger.WebApi.DtoModels;
 public record CollectionGameDto()
 {
     public int Id { get; set; }
+    public int UserId { get; set; }
     public DateTimeOffset TimeAdded { get; set; }
     public DateTimeOffset? TimeAcquired { get; set; }
     public ulong? PurchasePrice { get; set; }

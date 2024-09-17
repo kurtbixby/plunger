@@ -13,13 +13,13 @@ function TopNavigation() {
             {!isLoggedIn ? <LoginWidget/> :
             <ul>
                 <li>
-                    <Link to={"/" + user.userName}>My Profile</Link>
+                    <Link to={"/" + user.username}>My Profile</Link>
                 </li>
                 <li>
-                    <Link to={"/" + user.userName + "/collection"}>Collection</Link>
+                    <Link to={"/" + user.username + "/collection"}>Collection</Link>
                 </li>
                 <li>
-                    <Link to={"/" + user.userName + "/lists"}>Lists</Link>
+                    <Link to={"/" + user.username + "/lists"}>Lists</Link>
                 </li>
             </ul>
             }

@@ -29,6 +29,7 @@ public static class ListFetching
                 Status = new GameStatusDto()
                 {
                     Id = gs.Id,
+                    UserId = gs.UserId,
                     Completed = gs.Completed,
                     PlayState = gs.PlayState,
                     TimePlayed = gs.TimePlayed,
@@ -71,6 +72,7 @@ public static class ListFetching
                 new CollectionGameDto
                 {
                     Id = cg.Id,
+                    UserId = userId,
                     TimeAdded = cg.TimeAdded,
                     TimeAcquired = cg.TimeAcquired,
                     PurchasePrice = cg.PurchasePrice,
@@ -90,6 +92,7 @@ public static class ListFetching
             GameStatus = new GameStatusDto()
             {
                 Id = gs.Id,
+                UserId = gs.UserId,
                 Completed = gs.Completed,
                 PlayState = gs.PlayState,
                 TimePlayed = gs.TimePlayed,
@@ -131,6 +134,7 @@ public static class ListFetching
                 Status = new GameStatusDto()
                 {
                     Id = gs.Id,
+                    UserId = gs.UserId,
                     Completed = gs.Completed,
                     PlayState = gs.PlayState,
                     TimePlayed = gs.TimePlayed,
@@ -159,6 +163,7 @@ public static class ListFetching
             .ToDictionary(g => g.Key, g => g.Select(cg => new CollectionGameDto
             {
                 Id = cg.Id,
+                UserId = userId,
                 TimeAdded = cg.TimeAdded,
                 TimeAcquired = cg.TimeAcquired,
                 PurchasePrice = cg.PurchasePrice,

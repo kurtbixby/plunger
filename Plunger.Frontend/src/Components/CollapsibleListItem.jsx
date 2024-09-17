@@ -1,4 +1,5 @@
-function CollapsibleListItem({ children, title, id, isOpen, toggleItem }) {
+function CollapsibleListItem(props) {
+    const { children, title, id, isOpen, toggleItem } = props
   return (
     <div>
       <button className="collapsibleHeader" onClick={() => toggleItem(id)}>

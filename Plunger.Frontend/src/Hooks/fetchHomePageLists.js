@@ -1,4 +1,10 @@
-async function fetchHomePageLists({ queryKey }) {
+import APICalls from '../APICalls.js';
+
+async function fetchHomePageLists() {
+  return await APICalls.sendGetHomePageLists();
+}
+
+async function fetchHomePageListsOld({ queryKey }) {
   const placeholderData = [
     {
       title: "Recently Started",
