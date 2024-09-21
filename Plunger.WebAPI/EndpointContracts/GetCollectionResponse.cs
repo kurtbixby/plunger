@@ -1,4 +1,5 @@
 using Plunger.Data.Enums;
+using Plunger.WebApi.DtoModels;
 
 namespace Plunger.WebApi.EndpointContracts;
 
@@ -14,9 +15,9 @@ public record CollectionResponseCollectionGame
     public DateTimeOffset? TimeAcquired { get; set; }
     public ulong? PurchasePrice { get; set; }
     public Physicality Physicality { get; set; }
-    public CollectionResponseRegion Region { get; set; }
-    public CollectionResponsePlatform Platform { get; set; }
-    public CollectionResponseGame Game { get; set; }
+    public RegionDto Region { get; set; }
+    public PlatformDto Platform { get; set; }
+    public GameDto Game { get; set; }
 }
 
 public record CollectionResponseGame

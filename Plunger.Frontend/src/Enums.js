@@ -9,4 +9,19 @@ const Physicality = Object.freeze(
     }
 );
 
-export default { Physicality };
+const PlayStates = Object.freeze(
+    {
+            0: "Unspecified",
+            "Unspecified": 0,
+            1: "Unplayed",
+            "Unplayed": 1,
+            2: "In Progress",
+            "In Progress": 2,
+            3: "Completed",
+            "Completed": 3,
+            4: "Paused",
+            "Paused": 4,
+    }
+);
+
+export default { Physicality, PlayStates };

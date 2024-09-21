@@ -10,6 +10,6 @@ public record CollectionGameDto()
     public DateTimeOffset? TimeAcquired { get; set; }
     public ulong? PurchasePrice { get; set; }
     public Physicality Physicality { get; set; }
-    public int PlatformId { get; set; }
-    public int RegionId { get; set; }
+    public PlatformDto Platform { get; set; }
+    public RegionDto Region { get; set; }
 }

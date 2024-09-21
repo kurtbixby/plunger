@@ -60,9 +60,10 @@ public static class GameStateRoutes
             return Results.BadRequest();
         }
 
+        var timePlayed = createGameReq.TimePlayed ?? TimeSpan.Zero; 
         var timeStarted = createGameReq.PlayState == PlayState.InProgress ? createGameReq.TimeStamp : (DateTimeOffset?)null;
-        var status = new GameStatus() { UserId = userId,  GameId = gameId, Completed = completed, PlayState = (int)createGameReq.PlayState.Value, UpdatedAt = createGameReq.TimeStamp, TimePlayed = TimeSpan.Zero, TimeStarted = timeStarted};
-        var stateChange = new PlayStateChange() { UpdatedAt = createGameReq.TimeStamp, NewState = (int)createGameReq.PlayState.Value, GameStatus = status, TimePlayed = TimeSpan.Zero};
+        var status = new GameStatus() { UserId = userId,  GameId = gameId, Completed = completed, PlayState = (int)createGameReq.PlayState.Value, UpdatedAt = createGameReq.TimeStamp, TimePlayed = timePlayed, TimeStarted = timeStarted};
+        var stateChange = new PlayStateChange() { UpdatedAt = createGameReq.TimeStamp, NewState = (int)createGameReq.PlayState.Value, GameStatus = status, TimePlayed = timePlayed};
         dbContext.GameStatuses.Add(status);
         dbContext.PlayStateChanges.Add(stateChange);
         await dbContext.SaveChangesAsync();

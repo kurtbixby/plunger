@@ -29,20 +29,20 @@ public static class CollectionRoutes
                 c.Id, c.User, Games = c.Games.Select(g => new CollectionResponseCollectionGame()
                 {
                     Id = g.Id, TimeAdded = g.TimeAdded, TimeAcquired = g.TimeAcquired, Physicality = g.Physicality, PurchasePrice = g.PurchasePrice,
-                    Region = new CollectionResponseRegion()
+                    Region = new RegionDto()
                     {
                         Id = g.RegionId,
                         // Technically this name is not correct and it should grab from the database
                         Name = EnumStrings.RegionNames[(int)g.Region]
                     },
-                    Platform = new CollectionResponsePlatform()
+                    Platform = new PlatformDto()
                     {
                         Id = g.PlatformId,
                         Name = g.Platform.Name,
                         AltName = g.Platform.AltName,
                         Abbreviation = g.Platform.Abbreviation
                     },
-                    Game = new CollectionResponseGame()
+                    Game = new GameDto()
                     {
                         Id = g.Game.Id,
                         Name = g.Game.Name,

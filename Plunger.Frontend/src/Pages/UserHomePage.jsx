@@ -4,12 +4,14 @@ import SmallList from "../Components/SmallList";
 import AddGameWidget from "../Widgets/AddGameWidget";
 import NowPlayingWidget from "../Widgets/NowPlayingWidget";
 import {useCurrentUser} from "../CurrentUserProvider.jsx";
+import {queryKeyConstants} from "../Hooks/queryKeyConstants.js";
+import ListWidget from "../Widgets/ListWidget.jsx";
 
 function UserHomePage() {
     const { state: { isLoading, isLoggedIn, user: currentUser } } = useCurrentUser();
 
   const results = useQuery({
-    queryKey: ["homePageLists", currentUser === null ? 0 : currentUser.userId],
+    queryKey: [queryKeyConstants.homePageLists, currentUser === null ? 0 : currentUser.userId],
     queryFn: fetchHomePageLists,
   });
   const lists = isLoggedIn ? (results?.data ?? []) : [];
@@ -23,7 +25,7 @@ function UserHomePage() {
             {!lists.length ? (
               <h1>No Lists</h1>
             ) : (
-              lists.map((list) => list.type === 1 ? <NowPlayingWidget key={list.id} list={list}/> : <SmallList key={list.id} list={list} />)
+              lists.map((list) => list.type === 1 ? <NowPlayingWidget key={list.id} list={list}/> : <ListWidget key={list.id} list={list} />)
             )}
           </div>
         </>}

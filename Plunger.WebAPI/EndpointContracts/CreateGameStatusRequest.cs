@@ -9,4 +9,5 @@ public record CreateGameStatusRequest()
     [JsonPropertyName("timestamp")] public DateTimeOffset TimeStamp  { get; init; }
     [JsonPropertyName("completed")] public bool? Completed  { get; init; }
     [JsonPropertyName("playstate")] public PlayState? PlayState  { get; init; }
+    [JsonPropertyName("timeplayed")] public TimeSpan? TimePlayed  { get; init; }
 };

@@ -24,7 +24,7 @@ public static class ListFetching
                     Id = gs.Game.Id,
                     Name = gs.Game.Name,
                     ShortName = gs.Game.ShortName,
-                    CoverUrl = gs.Game.Cover?.Url ?? "",
+                    CoverUrl = gs.Game.Cover?.Url,
                 },
                 Status = new GameStatusDto()
                 {
@@ -56,7 +56,8 @@ public static class ListFetching
     // create default status for those without any???
     public static async Task<UserListDto> RetrieveRecentlyAcquiredList(int userId, PlungerDbContext dbContext)
     {
-        var collectionGames = (await dbContext.Users.Include(u => u.Collection).ThenInclude(c => c.Games).ThenInclude(g => g.Game)
+        var collectionGames = (await dbContext.Users.Include(u => u.Collection).ThenInclude(c => c.Games).ThenInclude(cg => cg.Game)
+            .Include(u => u.Collection).ThenInclude(c => c.Games).ThenInclude(cg => cg.Platform)
             .FirstAsync(user => user.Id == userId)).Collection.Games.OrderByDescending(g => g.TimeAcquired).ThenByDescending(g => g.TimeAdded).Take(10).Select(cg => new ListEntryDto
         {
             Id = cg.Id,
@@ -77,8 +78,19 @@ public static class ListFetching
                     TimeAcquired = cg.TimeAcquired,
                     PurchasePrice = cg.PurchasePrice,
                     Physicality = cg.Physicality,
-                    PlatformId = cg.PlatformId,
-                    RegionId = cg.RegionId,
+                    Platform = new PlatformDto()
+                    {
+                        Id = cg.PlatformId,
+                        Name = cg.Platform.Name,
+                        AltName = cg.Platform.AltName,
+                        Abbreviation = cg.Platform.Abbreviation
+                    },
+                    Region = new RegionDto()
+                    {
+                        Id = cg.RegionId,
+                        // Technically this name is not correct and it should grab from the database
+                        Name = EnumStrings.RegionNames[(int)cg.Region]
+                    },
                 }
             ],
         }).ToList();
@@ -158,7 +170,7 @@ public static class ListFetching
     private static List<ListEntryDto> FillResponseWithCollectionGames(List<ListEntryDto> partiallyFiledResponses, int userId, PlungerDbContext dbContext)
     {
         var gameIds = partiallyFiledResponses.Select(gs => gs.Game.Id);
-        var collectionGameDict = dbContext.CollectionGames.Include(cg => cg.Collection)
+        var collectionGameDict = dbContext.CollectionGames.Include(cg => cg.Collection).Include(cg => cg.Platform)
             .Where(cg => cg.Collection.UserId == userId && gameIds.Contains(cg.GameId)).GroupBy(gs => gs.GameId)
             .ToDictionary(g => g.Key, g => g.Select(cg => new CollectionGameDto
             {
@@ -168,8 +180,19 @@ public static class ListFetching
                 TimeAcquired = cg.TimeAcquired,
                 PurchasePrice = cg.PurchasePrice,
                 Physicality = cg.Physicality,
-                PlatformId = cg.PlatformId,
-                RegionId = cg.RegionId
+                Platform = new PlatformDto()
+                {
+                    Id = cg.PlatformId,
+                    Name = cg.Platform.Name,
+                    AltName = cg.Platform.AltName,
+                    Abbreviation = cg.Platform.Abbreviation
+                },
+                Region = new RegionDto()
+                {
+                    Id = cg.RegionId,
+                    // Technically this name is not correct and it should grab from the database
+                    Name = EnumStrings.RegionNames[(int)cg.Region]
+                },
             }).ToList());
         
         foreach (var response in partiallyFiledResponses)
