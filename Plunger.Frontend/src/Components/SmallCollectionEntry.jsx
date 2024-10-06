@@ -1,6 +1,4 @@
 import {dateFormat, formatCurrency} from "../Utils.js";
-import WrappedSelect from "./WrappedSelect.jsx";
-import UIConstants from "../UIConstants.js";
 import Enums from "../Enums.js";
 import SmallRowElement from "./SmallRowElement.jsx";
 

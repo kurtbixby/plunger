@@ -6,6 +6,7 @@ import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {queryKeyConstants} from "../Hooks/queryKeyConstants.js";
 import createGameStatus from "../Hooks/createGameStatus.js";
 import {useCurrentUser} from "../CurrentUserProvider.jsx";
+import TimeInput from "../Components/TimeInput.jsx";
 
 function AddStatusWidget(props) {
     const { game } = props;
@@ -27,10 +28,6 @@ function AddStatusWidget(props) {
         }
     });
     
-    function fixTimeInput(timeString) {
-        return timeString;
-    }
-    
     async function saveChanges(event) {
         event.preventDefault();
         
@@ -45,20 +42,11 @@ function AddStatusWidget(props) {
             <div className="flex grow flex-col content-start items-center">
                 <label className="text-center" htmlFor="status">Current Status</label>
                 <WrappedSelect name="status" styles="text-center" contents={UIConstants.PlayStates.list}
-                               value={playState} onSelect={setPlayState}/>
+                               value={playState} onSelect={e => setPlayState(e.target.value)}/>
             </div>
             <div className="flex grow flex-col content-start items-center">
                 <label className="text-center" htmlFor="currentHours">Hours Played</label>
-                <input
-                    className="w-20 text-center"
-                    name="currentHours"
-                    value={currentHours}
-                    onChange={(e) => {
-                        let timeString = fixTimeInput(e.target.value);
-                        setCurrentHours(timeString);
-                    }
-                    }
-                />
+                <TimeInput styles="w-20 text-center" name="currentHours" value={currentHours} onChange={setCurrentHours} />
             </div>
             <button className="grow" type="submit">Save Changes</button>
         </form>

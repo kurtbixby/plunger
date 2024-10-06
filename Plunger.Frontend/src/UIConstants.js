@@ -5,6 +5,24 @@ const Platforms = {
     ]
 }
 
+const Physicalities = {
+    timestamp: 1723849835,
+    list: [
+        {
+            id: 0,
+            name: "Unknown"
+        },
+        {
+            id: 1,
+            name: "Physical"
+        },
+        {
+            id: 2,
+            name: "Digital"
+        }
+    ]
+}
+
 const PlayStates = {
     timestamp: 1723849835,
     list: [
@@ -81,4 +99,4 @@ const Regions = {
     ]
 }
 
-export default { PlayStates, Regions }
+export default { Physicalities, PlayStates, Regions }

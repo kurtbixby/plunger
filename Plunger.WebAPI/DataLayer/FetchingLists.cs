@@ -2,8 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Plunger.Common.Enums;
 using Plunger.Data;
-using Plunger.Data.DbModels;
-using Plunger.Data.Enums;
 using Plunger.WebApi.DtoModels;
 
 namespace Plunger.WebApi.DataLayer;
@@ -89,7 +87,7 @@ public static class ListFetching
                     {
                         Id = cg.RegionId,
                         // Technically this name is not correct and it should grab from the database
-                        Name = EnumStrings.RegionNames[(int)cg.Region]
+                        Name = EnumStrings.RegionNames[cg.RegionId]
                     },
                 }
             ],
@@ -98,6 +96,7 @@ public static class ListFetching
         // Find GameStatus from CollectionGame
         var gameIds = collectionGames.Select(g => g.Game.Id);
         
+        // This has a bug. This DOES NOT filter on userId
         var statuses = dbContext.GameStatuses.Include(gs => gs.Game).ThenInclude(g => g.Cover).Where(gs => gameIds.Contains(gs.GameId)).Select(gs => new
         {
             GameId = gs.GameId,
@@ -191,7 +190,7 @@ public static class ListFetching
                 {
                     Id = cg.RegionId,
                     // Technically this name is not correct and it should grab from the database
-                    Name = EnumStrings.RegionNames[(int)cg.Region]
+                    Name = EnumStrings.RegionNames[cg.RegionId]
                 },
             }).ToList());
         

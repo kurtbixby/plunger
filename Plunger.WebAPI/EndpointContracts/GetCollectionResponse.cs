@@ -1,4 +1,4 @@
-using Plunger.Data.Enums;
+using Plunger.Common.Enums;
 using Plunger.WebApi.DtoModels;
 
 namespace Plunger.WebApi.EndpointContracts;
@@ -18,27 +18,6 @@ public record CollectionResponseCollectionGame
     public RegionDto Region { get; set; }
     public PlatformDto Platform { get; set; }
     public GameDto Game { get; set; }
+    public GameStatusDto? Status { get; set; }
+    public Guid VersionId { get; set; }
 }
-
-public record CollectionResponseGame
-{
-    public int Id { get; set; }
-    public string Name { get; set; }
-    public string ShortName { get; set; }
-    public string? CoverUrl { get; set; }
-}
-
-public record CollectionResponsePlatform
-{
-    public int Id { get; set; }
-    public string Name { get; set; }
-    public string? AltName { get; set; }
-    public string Abbreviation { get; set; }
-}
-
-public record CollectionResponseRegion
-{
-    public int Id { get; set; }
-    public string Name { get; set; }
-}
-

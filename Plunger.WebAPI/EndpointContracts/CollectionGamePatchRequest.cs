@@ -1,4 +1,4 @@
-using Plunger.Data.Enums;
+using Plunger.Common.Enums;
 
 namespace Plunger.WebApi.EndpointContracts;
 

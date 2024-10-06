@@ -1,5 +1,4 @@
 using System.Text.Json.Serialization;
-using Plunger.Data.Enums;
 
 namespace Plunger.Data.IgdbAPIModels;
 

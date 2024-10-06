@@ -5,6 +5,7 @@ import WrappedSelect from "../Components/WrappedSelect";
 import addGameReducer from "./addGameReducer.js";
 import currency from "currency.js";
 import {useCurrentUser} from "../CurrentUserProvider.jsx";
+import CurrencyInput from "../Components/CurrencyInput.jsx";
 
 function AddGameWidget() {
     const { state: {user: currentUser} } = useCurrentUser();
@@ -16,7 +17,6 @@ function AddGameWidget() {
       platformId: NaN,
       version: "",
       price: NaN,
-      priceString: "",
       searchField: "",
       tangibility: "",
       region: "",
@@ -74,37 +74,6 @@ function AddGameWidget() {
   function validateFormInputs() {
       
   }
-  
-  function formatPriceValue(priceValue) {
-      return currency(priceValue, {fromCents: true}).format();
-      
-      // return String(priceValue);
-      
-      // Store as cents, if straight dollars , divide by 100
-      let cents = priceValue % 100;
-      let dollars = priceValue / 100;
-      
-      let dollArr = String(dollars).split('');
-      let length = dollArr.length;
-      
-      for (let i = 0; length - (3 * i) > 0; i++) {
-          let spot = length - (3 * i);
-          dollArr.splice(spot, 0, ',');
-      }
-      return `$${dollArr.join()}.${String(cents).padStart(2, 0)}`;
-  }
-  
-  function tryParsePriceStringLib(priceString) {
-      return currency(priceString).intValue;
-  }
-  
-  function tryParsePriceString(priceString) {
-      // remove $, ,, and .
-      let regex = /[$,.\D]/g;
-      let newStr = priceString.replaceAll(regex, '');
-      let parsedNum = Number(newStr);
-      return parsedNum;
-  }
     
     function changeTextDispatch(typedText) {
       dispatch({
@@ -141,25 +110,11 @@ function AddGameWidget() {
       });
     }
     
-    function changePriceDispatch(price) {
-      console.log("PriceInput: " + price);
-      let priceNum = tryParsePriceStringLib(price);
-        console.log("PriceNum: " + price);
-      if (isNaN(priceNum)) {
-          console.log("Couldn't parse price");
-          return;
-      }
-      
-      let str = formatPriceValue(priceNum);
-      console.log("PriceStr: " + str);
-      
-      dispatch({
-          type: "priceChanged",
-          payload: {
-              number: priceNum,
-              string: formatPriceValue(priceNum)
-          }
-      });
+    function changePriceDispatch(priceNum) {
+        dispatch({
+            type: "priceChanged",
+            payload: priceNum
+        });
     }
     
     function selectDateDispatch(date) {
@@ -194,7 +149,7 @@ function AddGameWidget() {
                 <label htmlFor="platformDropDown">Platform:</label>
                 <div>
                     {/*<SelectDropDown contents={selectedGame?.platforms ?? platforms} value={formState.platform} initialMessage={"Select a platform"} onSelect={selectPlatform}/>*/}
-                    <WrappedSelect name={"platform"} contents={formState.game?.platforms ?? platforms} value={formState.platformId} onSelect={selectPlatformIdDispatch}/>
+                    <WrappedSelect name={"platform"} contents={formState.game?.platforms ?? platforms} value={formState.platformId} onSelect={e => selectPlatformIdDispatch(e.target.value)}/>
                 </div>
               </div>
               {/*<div>*/}
@@ -208,7 +163,7 @@ function AddGameWidget() {
               {/*</div>*/}
               <div>
                   <label htmlFor="region">Region:</label>
-                  <WrappedSelect name={"region"} contents={formState.game?.regions ?? []} value={formState.region} onSelect={selectRegionDispatch}/>
+                  <WrappedSelect name={"region"} contents={formState.game?.regions ?? []} value={formState.region} onSelect={e => selectRegionDispatch(e.target.value)}/>
                   {/*<input*/}
                   {/*    name="region"*/}
                   {/*    type="text"*/}
@@ -238,12 +193,7 @@ function AddGameWidget() {
     
               <div>
                   <label htmlFor="price">Price:</label>
-                  <input
-                      name="price"
-                      type="text"
-                      value={formState.priceString}
-                      onChange={(e) => changePriceDispatch(e.target.value)}
-                  />
+                  <CurrencyInput name="price" value={formState.price} onChange={changePriceDispatch}/>
               </div>
               <div>
                   <label htmlFor="dateAcquired">Date Acquired:</label>

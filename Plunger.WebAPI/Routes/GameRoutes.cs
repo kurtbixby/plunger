@@ -1,8 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Plunger.Data;
-using Plunger.Data.DbModels;
-using Plunger.Data.Enums;
 
 namespace Plunger.WebApi.Routes;
 

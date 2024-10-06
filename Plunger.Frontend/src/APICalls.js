@@ -70,6 +70,10 @@ async function sendDeleteGameStatusRequest(userId, gameId) {
     return await UserRequestsWrapper.makeDeleteRequest(`/api/users/${userId}/games/${gameId}`);
 }
 
+async function sendEditCollectionViewRequest(userId, editCollectionViewRequest) {
+    return await UserRequestsWrapper.makePatchRequest(`/api/users/${userId}/collection`, editCollectionViewRequest)
+}
+
 async function sendGameSearchRequest(gameName) {
     return await UserRequestsWrapper.makeGetRequest(`/api/games?name=${gameName}`);
 }
@@ -86,4 +90,4 @@ async function sendGetHomePageLists() {
     return await UserRequestsWrapper.makeGetRequest(`/api/lists/homepage`);
 }
 
-export default { sendLoginRequest, sendTokenLoginRequest, sendNewUserRequest, sendAddGameRequest, sendEditGameRequest, sendDeleteGameRequest, sendCreateListRequest, sendEditListRequest, sendDeleteListRequest, sendAddGameStatusRequest, sendEditGameStatusRequest, sendDeleteGameStatusRequest, sendGameSearchRequest, sendPlatformsRequest, sendGetCollectionRequest, sendGetHomePageLists };
+export default { sendLoginRequest, sendTokenLoginRequest, sendNewUserRequest, sendAddGameRequest, sendEditGameRequest, sendDeleteGameRequest, sendCreateListRequest, sendEditListRequest, sendDeleteListRequest, sendAddGameStatusRequest, sendEditGameStatusRequest, sendDeleteGameStatusRequest, sendGameSearchRequest, sendPlatformsRequest, sendGetCollectionRequest, sendGetHomePageLists, sendEditCollectionViewRequest };

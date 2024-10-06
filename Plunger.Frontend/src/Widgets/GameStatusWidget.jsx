@@ -70,7 +70,7 @@ function GameStatusWidget(props) {
         <form className="flex grow" onSubmit={saveChanges}>
             <div className="flex grow flex-col content-start items-center">
                 <label className="text-center" htmlFor="currentHours">Current Status</label>
-                <WrappedSelect name="status" styles="text-center" contents={UIConstants.PlayStates.list} value={playStatus} onSelect={setPlayStatus} />
+                <WrappedSelect name="status" styles="text-center" contents={UIConstants.PlayStates.list} value={playStatus} onSelect={e => setPlayStatus(e.target.value)} />
             </div>
             <div className="flex grow flex-col content-start items-center">
     

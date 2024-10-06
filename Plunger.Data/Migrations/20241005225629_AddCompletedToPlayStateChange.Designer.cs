@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Plunger.Data;
@@ -11,9 +12,11 @@ using Plunger.Data;
 namespace Plunger.Data.Migrations
 {
     [DbContext(typeof(PlungerDbContext))]
-    partial class PlungerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241005225629_AddCompletedToPlayStateChange")]
+    partial class AddCompletedToPlayStateChange
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -93,6 +96,9 @@ namespace Plunger.Data.Migrations
 
                     b.Property<decimal?>("PurchasePrice")
                         .HasColumnType("numeric(20,0)");
+
+                    b.Property<int>("Region")
+                        .HasColumnType("integer");
 
                     b.Property<int>("RegionId")
                         .HasColumnType("integer");

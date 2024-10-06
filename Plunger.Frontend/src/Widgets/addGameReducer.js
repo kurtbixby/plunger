@@ -42,8 +42,7 @@ function addGameReducer(formState, action) {
             let price = action.payload;
             return {
                 ...formState,
-                price: price.number,
-                priceString: price.string
+                price: price,
             };
         }
         case 'dateSelected': {

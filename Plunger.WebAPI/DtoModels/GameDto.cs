@@ -6,4 +6,6 @@ public record GameDto()
     public string Name { get; set; }
     public string ShortName { get; set; }
     public string? CoverUrl { get; set; }
+    public List<PlatformDto> Platforms { get; set; }
+    public Guid VersionId { get; set; }
 }

@@ -2,8 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Plunger.Data;
 using Plunger.Data.DbModels;
-using Plunger.Data.Enums;
-using Plunger.WebApi.DtoModels;
+using Plunger.Common.Enums;
 using Plunger.WebApi.EndpointContracts;
 
 namespace Plunger.WebApi.Routes;
@@ -63,7 +62,7 @@ public static class GameStateRoutes
         var timePlayed = createGameReq.TimePlayed ?? TimeSpan.Zero; 
         var timeStarted = createGameReq.PlayState == PlayState.InProgress ? createGameReq.TimeStamp : (DateTimeOffset?)null;
         var status = new GameStatus() { UserId = userId,  GameId = gameId, Completed = completed, PlayState = (int)createGameReq.PlayState.Value, UpdatedAt = createGameReq.TimeStamp, TimePlayed = timePlayed, TimeStarted = timeStarted};
-        var stateChange = new PlayStateChange() { UpdatedAt = createGameReq.TimeStamp, NewState = (int)createGameReq.PlayState.Value, GameStatus = status, TimePlayed = timePlayed};
+        var stateChange = new PlayStateChange() { UpdatedAt = createGameReq.TimeStamp, NewState = (int)createGameReq.PlayState.Value, GameStatus = status, TimePlayed = timePlayed, Completed = completed };
         dbContext.GameStatuses.Add(status);
         dbContext.PlayStateChanges.Add(stateChange);
         await dbContext.SaveChangesAsync();

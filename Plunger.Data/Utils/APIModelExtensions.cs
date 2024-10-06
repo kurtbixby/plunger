@@ -1,6 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-using Plunger.Data.DbModels;
-using Plunger.Data.IgdbAPIModels;
 using Platform = Plunger.Data.DbModels.Platform;
 using Region = Plunger.Common.Enums.Region;
 using ReleaseDate = Plunger.Data.DbModels.ReleaseDate;
@@ -56,8 +53,8 @@ public static class CoverExtensions
 
 public static class DateFormatExtensions
 {
-    public static Enums.DateFormat ToCommonEnum(this Data.IgdbAPIModels.DateFormat format) =>
-        Enum.TryParse(format.ToString(), out Enums.DateFormat eFormat) ? eFormat : Enums.DateFormat.TBD;
+    public static Common.Enums.DateFormat ToCommonEnum(this Data.IgdbAPIModels.DateFormat format) =>
+        Enum.TryParse(format.ToString(), out Common.Enums.DateFormat eFormat) ? eFormat : Common.Enums.DateFormat.TBD;
 }
 
 public static class PlatformExtensions

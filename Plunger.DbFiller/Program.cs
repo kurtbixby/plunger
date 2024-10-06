@@ -1,9 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Plunger.Common;
+using Plunger.Common.Enums;
 using Plunger.Data;
-using Plunger.Data.DbModels;
-using Plunger.Data.Enums;
 using Plunger.Data.Utils;
 
 namespace Plunger.DbFiller;

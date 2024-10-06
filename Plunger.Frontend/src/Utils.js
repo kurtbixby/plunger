@@ -18,19 +18,21 @@ function dateFormat(date) {
         // month: "2-digit",
         // day: "2-digit",
         // year: "numeric"
-    }
+    };
     return dateObj.toLocaleDateString(undefined, options);
 }
 
-function timeFormat(dateTime) {
-    let dateObj = new Date(dateTime);
-    let options = {
-        timeZone: "UTC",
-        dateStyle: "short",
-        timeStyle: "short"
-    }
+function timeFormat(time) {
+    const [hours, minutes, seconds] = time.split(':');
     
-    return dateObj.toLocaleString(undefined, options);
+    // let dateObj = new Date(dateTime);
+    // let options = {
+    //     timeZone: "UTC",
+    //     dateStyle: "short",
+    //     timeStyle: "short"
+    // }
+    //
+    // return dateObj.toLocaleString(undefined, options);
 }
 
 function formatMoney(price) {

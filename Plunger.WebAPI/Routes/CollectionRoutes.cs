@@ -1,9 +1,11 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualBasic.CompilerServices;
 using Plunger.Data;
 using Plunger.Data.DbModels;
-using Plunger.Data.Enums;
+using Plunger.Common.Enums;
+using Plunger.WebApi.DataLayer;
 using Plunger.WebApi.DtoModels;
 using Plunger.WebApi.EndpointContracts;
 
@@ -15,6 +17,7 @@ public static class CollectionRoutes
     {
         group.MapPost("/users/{userid}/collection", AddToCollection).RequireAuthorization();
         group.MapGet("/users/{username}/collection", GetCollection);
+        group.MapPatch("/users/{userid}/collection", EditCollectionEntry).RequireAuthorization();
         group.MapPatch("/users/{userid}/collection/{itemid}", EditCollection).RequireAuthorization();
         group.MapDelete("/users/{userid}/collection/{itemid}", DeleteFromCollection).RequireAuthorization();
 
@@ -23,46 +26,73 @@ public static class CollectionRoutes
 
     private static GetCollectionResponse GetCollection([FromRoute] string username, [FromServices] PlungerDbContext db)
     {
-        var collections = db.Collections.Select(
-            c => new
-            {
-                c.Id, c.User, Games = c.Games.Select(g => new CollectionResponseCollectionGame()
+        var userId = db.Users.First(u => string.Equals(u.Username, username)).Id;
+        var collections = db.Collections.Include(c => c.Games).ThenInclude(cg => cg.Game).ThenInclude(g => g.Platforms)
+            .Select(
+                c => new
                 {
-                    Id = g.Id, TimeAdded = g.TimeAdded, TimeAcquired = g.TimeAcquired, Physicality = g.Physicality, PurchasePrice = g.PurchasePrice,
-                    Region = new RegionDto()
+                    c.Id, c.User, Games = c.Games.Select(g => new CollectionResponseCollectionGame()
                     {
-                        Id = g.RegionId,
-                        // Technically this name is not correct and it should grab from the database
-                        Name = EnumStrings.RegionNames[(int)g.Region]
-                    },
-                    Platform = new PlatformDto()
-                    {
-                        Id = g.PlatformId,
-                        Name = g.Platform.Name,
-                        AltName = g.Platform.AltName,
-                        Abbreviation = g.Platform.Abbreviation
-                    },
-                    Game = new GameDto()
-                    {
-                        Id = g.Game.Id,
-                        Name = g.Game.Name,
-                        ShortName = g.Game.ShortName,
-                        CoverUrl = g.Game.Cover != null ? g.Game.Cover.Url : null
-                    }
-                })
-            }).Where(collection => collection.User.Username == username);
+                        Id = g.Id, TimeAdded = g.TimeAdded, TimeAcquired = g.TimeAcquired, Physicality = g.Physicality,
+                        PurchasePrice = g.PurchasePrice, VersionId = g.VersionId,
+                        Region = new RegionDto()
+                        {
+                            Id = g.RegionId,
+                            // Technically this name is not correct and it should grab from the database
+                            Name = EnumStrings.RegionNames[g.RegionId]
+                        },
+                        Platform = new PlatformDto()
+                        {
+                            Id = g.PlatformId,
+                            Name = g.Platform.Name,
+                            AltName = g.Platform.AltName,
+                            Abbreviation = g.Platform.Abbreviation
+                        },
+                        Game = new GameDto()
+                        {
+                            Id = g.Game.Id,
+                            Name = g.Game.Name,
+                            ShortName = g.Game.ShortName,
+                            CoverUrl = g.Game.Cover != null ? g.Game.Cover.Url : null,
+                            Platforms = g.Game.Platforms.Select(p => new PlatformDto()
+                            {
+                                Id = p.Id,
+                                Name = p.Name,
+                                AltName = p.AltName,
+                                Abbreviation = p.Abbreviation
+                            }).ToList()
+                        }
+                    })
+                }).Where(collection => collection.User.Username == username);
 
-        var foo = collections.ToList();
+        var games = collections.First().Games.ToList();
 
-        return new GetCollectionResponse() { Games = collections.First().Games };
-        // return db.Collections.Select(
-        //     c => new
+        var gameIds = games.Select(g => g.Game.Id);
+
+        var statuses = DataLayer.Utils.GameStatusesForGameIds(db, userId, gameIds);
+        
+        foreach (var entry in games.Where(entry => statuses.ContainsKey(entry.Game.Id)))
+        {
+            entry.Status = statuses[entry.Game.Id];
+        }
+        
+        // var gameStatuses = db.Users.Include(u => u.GameStatuses).Where(u => string.Equals(u.Username, username))
+        //     .Select(u => u.GameStatuses.Select(gs => new
         //     {
-        //         c.Id, c.UserId, Games = c.Games.Select(g => new
+        //         GameId = gs.GameId,
+        //         GameStatus = new GameStatusDto()
         //         {
-        //             g.Id, g.TimeAdded, g.TimeAcquired, g.Physicality, g.GameId, g.PlatformId, g.RegionId, g.VersionId
-        //         })
-        //     }).Where(collection => collection.UserId == username);
+        //             Id = gs.Id,
+        //             UserId = gs.UserId,
+        //             Completed = gs.Completed,
+        //             PlayState = gs.PlayState,
+        //             TimePlayed = gs.TimePlayed,
+        //             DateStarted = gs.TimeStarted
+        //         }
+        //     }).Where(gs => gameIds.Contains(gs.GameId))).ToDictionary(gs => gs.GameId, gs => gs.);
+
+        return new GetCollectionResponse() { Games = games };
+        // return new GetCollectionResponse() { Games = collections.First().Games };
     }
 
     private static async Task<IResult> AddToCollection(HttpContext httpContext, [FromRoute] int userId,
@@ -101,7 +131,7 @@ public static class CollectionRoutes
             var collectionGame = new CollectionGame()
             {
                 Collection = collection, GameId = req.GameId, PlatformId = req.PlatformId, RegionId = (int)req.Region,
-                Region = req.Region, TimeAdded = DateTimeOffset.UtcNow, TimeAcquired = dateAcquired, PurchasePrice = req.PurchasePrice, Physicality = req.Physicality, VersionId = Guid.NewGuid()
+                TimeAdded = DateTimeOffset.UtcNow, TimeAcquired = dateAcquired, PurchasePrice = req.PurchasePrice, Physicality = req.Physicality, VersionId = Guid.NewGuid()
             };
 
             await db.CollectionGames.AddAsync(collectionGame);
@@ -170,6 +200,44 @@ public static class CollectionRoutes
         }
     }
 
+    private static async Task<IResult> EditCollectionEntry([FromRoute] int userId,
+        [FromServices] PlungerDbContext db, [FromBody] CollectionEditEntryRequest req)
+    {
+        // var validRes = req.Validate();
+        //
+        // if (!validRes.IsValid)
+        // {
+        //     return Results.BadRequest(validRes.ValidationErrors);
+        // }
+
+        try
+        {
+            var results = new List<DbEditResponse>();
+            if (req.EntryEdits != null)
+            {
+                results.Add(await CollectionLayer.EditCollectionEntry(db, req.EntryEdits));
+            }
+            if (req.StatusEdits != null)
+            {
+                results.Add(await GameStatusLayer.EditGameStatus(db, req.StatusEdits));
+            }
+
+            if (results.Any(e => !e.Success))
+            {
+                return Results.Problem();
+            }
+            
+            await db.SaveChangesAsync();
+        
+            return Results.Ok();
+        }
+        catch (InvalidOperationException e)
+        {
+            Console.WriteLine(e);
+            return Results.Problem();
+        }
+    }
+    
     private static async Task<IResult> DeleteFromCollection([FromRoute] int userId, [FromRoute] int itemId,
         [FromServices] PlungerDbContext db)
     {

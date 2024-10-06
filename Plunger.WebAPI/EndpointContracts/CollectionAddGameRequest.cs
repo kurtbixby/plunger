@@ -1,5 +1,5 @@
 using System.Text.Json.Serialization;
-using Plunger.Data.Enums;
+using Plunger.Common.Enums;
 using Region = Plunger.Common.Enums.Region;
 
 namespace Plunger.WebApi.EndpointContracts;
