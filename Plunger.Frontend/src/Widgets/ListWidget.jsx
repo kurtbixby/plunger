@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import CollapsibleListItem from "../Components/CollapsibleListItem";
-import fetchNowPlaying from "../Hooks/fetchNowPlaying";
-import SmallGameStatus from "../Components/SmallGameStatus";
 import { useCurrentUser } from "../CurrentUserProvider.jsx";
 import SmallCollectionEntry from "../Components/SmallCollectionEntry.jsx";
 import AddStatusWidget from "./AddStatusWidget.jsx";

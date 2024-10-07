@@ -1,32 +1,29 @@
 import {useParams} from "react-router-dom";
 import {useEffect, useState} from "react";
 import APICalls from "../APICalls.js";
-import Enums from "../Enums.js";
-import { dateFormat, formatCurrency } from "../Utils.js";
 import CollectionTable from "../Widgets/CollectionTable.jsx";
+import {useQuery} from "@tanstack/react-query";
+import fetchCollectionEntries from "../Hooks/fetchCollectionEntries.js";
+import {queryKeyConstants} from "../Hooks/queryKeyConstants.js";
 
 function CollectionPage() {
-    const { userName } = useParams();
+    const { userName: username } = useParams();
     
-    const [collectionResults, setCollectionResults] = useState([]);
+    const results = useQuery({
+        queryKey: [queryKeyConstants.collectionView, {username}],
+        queryFn: fetchCollectionEntries
+    });
     
-    useEffect(() => {
-        (async () => {
-            const collectionPageResponse = await APICalls.sendGetCollectionRequest(userName);
-            setCollectionResults(collectionPageResponse.games);
-        })()
-    }, [])
+    const collectionResults = results?.data?.games ?? [];
     
-    return (
-        <section>
+    return <section>
             <div>
-                <h2>{userName + 's Collection'}</h2>
+                <h2>{username + 's Collection'}</h2>
             </div>
             <section className={"flex justify-center"}>
-                <CollectionTable collectionEntries={collectionResults}/>
+                {collectionResults && <CollectionTable collectionEntries={collectionResults}/>}
             </section>
         </section>
-    );
 }
 
 export default CollectionPage;

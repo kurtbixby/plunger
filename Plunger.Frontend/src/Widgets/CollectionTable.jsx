@@ -13,7 +13,7 @@ function CollectionTable(props) {
             <p className={"basis-1/12"}>Date Acquired</p>
             <p className={"basis-1/12"}>Date Added</p>
         </div>
-        {collectionEntries?.map(ce => <CollectionTableRow key={ce.id} collectionEntry={ce}/>)}
+        {collectionEntries?.length > 0 && collectionEntries?.map(ce => <CollectionTableRow key={ce.id} collectionEntry={ce}/>)}
     </div>
 }
 

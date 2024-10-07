@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Plunger.Data;
 using Plunger.Data.DbModels;
 using Plunger.Common.Enums;
+using Plunger.WebApi.DtoModels;
 using Plunger.WebApi.EndpointContracts;
 
 namespace Plunger.WebApi.Routes;
@@ -13,6 +14,7 @@ public static class GameStateRoutes
     {
         group.MapPost("/users/{userid}/games/", CreateGameState).RequireAuthorization();
         group.MapGet("/users/{userId}/games/{gameId}", GetGameState);
+        group.MapGet("/users/{username}/games/", GetGameStates);
         group.MapPatch("/users/{userId}/games/{gameId}", EditGameState).RequireAuthorization();
 
         return group;
@@ -72,6 +74,36 @@ public static class GameStateRoutes
             Id = status.Id, UserId = status.UserId, Completed = status.Completed, PlayState = status.PlayState,
             UpdatedAt = status.UpdatedAt, Name = status.Game.Name, ShortName = status.Game.ShortName, TimePlayed = status.TimePlayed, TimeStarted = status.TimeStarted
         });
+    }
+
+    private static IResult GetGameStates([FromServices] PlungerDbContext db, [FromRoute] string username)
+    {
+        var userId = db.Users.First(u => string.Equals(u.Username, username)).Id;
+        var gameStatuses = db.GameStatuses.Include(gs => gs.Game).ThenInclude(g => g.Cover).Where(gs => gs.UserId == userId).Include(gs => gs.PlayStateChanges).Select(gs => new
+        {
+            gs.Id, gs.Completed, gs.PlayState, gs.TimePlayed, gs.TimeStarted, gs.PlayStateChanges,
+            Game = new
+            {
+                gs.Game.Id, gs.Game.Name, gs.Game.ShortName, coverUrl = gs.Game.Cover != null ? gs.Game.Cover.Url : null
+            },
+            CollectionEntries = gs.User.Collection.Games.Where(cg => cg.GameId == gs.GameId).Select(cg => new
+            {
+                cg.Id, cg.Physicality, cg.TimeAcquired, cg.TimeAdded, cg.PurchasePrice, Platform = new PlatformDto
+                {
+                    Id = cg.Platform.Id,
+                    Name = cg.Platform.Name,
+                    AltName = cg.Platform.AltName,
+                    Abbreviation = cg.Platform.Abbreviation
+                },
+                Region = new RegionDto
+                {
+                    Id = cg.RegionId,
+                    Name = EnumStrings.RegionNames[cg.RegionId]
+                }
+            })
+        });
+        
+        return Results.Ok(gameStatuses.ToList());
     }
 
     private static async Task<IResult> EditGameState(HttpContext httpContext, [FromServices] PlungerDbContext dbContext,

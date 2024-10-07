@@ -19,7 +19,7 @@ function TopNavigation() {
                     <Link to={"/" + user.username + "/collection"}>Collection</Link>
                 </li>
                 <li>
-                    <Link to={"/" + user.username + "/lists"}>Lists</Link>
+                    <Link to={"/" + user.username + "/gamestates"}>Game States</Link>
                 </li>
             </ul>
             }

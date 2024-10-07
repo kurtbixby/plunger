@@ -10,6 +10,7 @@ import ListsPage from "./Pages/ListsPage";
 import TokenManagement from "./TokenManagement";
 import APICalls from "./APICalls.js";
 import {CurrentUserProvider} from "./CurrentUserProvider.jsx";
+import StatusListPage from "./Pages/StatusListPage.jsx";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,6 +32,7 @@ function App() {
             <Route path="/" element={<UserHomePage />} />
             <Route path="/:userName" element={<ProfilePage />} />
             <Route path="/:userName/collection" element={<CollectionPage />} />
+            <Route path="/:userName/gamestates" element={<StatusListPage />} />
             {/*<Route path="/:userName/lists" element={<ListsPage />} />*/}
           </Routes>
         </CurrentUserProvider>
