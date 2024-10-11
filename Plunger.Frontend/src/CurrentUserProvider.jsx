@@ -20,7 +20,7 @@ function currentUserReducer(state, action) {
                 isLoggedIn: true,
                 user: {
                     username: user.username,
-                    userId: user.userId
+                    id: user.userId
                 }
             };
         }

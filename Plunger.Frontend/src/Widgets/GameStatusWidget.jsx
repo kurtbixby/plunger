@@ -57,9 +57,9 @@ function GameStatusWidget(props) {
         event.preventDefault();
 
         const editGameRequest = {
-            timestamp: new Date(Date.now()).toISOString(),
             playstate: playStatus,
-            timeplayed: currentHours
+            timeplayed: currentHours,
+            versionid: status.versionId
         };
 
         await mutation.mutateAsync(editGameRequest);

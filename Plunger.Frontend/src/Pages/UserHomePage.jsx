@@ -11,7 +11,7 @@ function UserHomePage() {
     const { state: { isLoading, isLoggedIn, user: currentUser } } = useCurrentUser();
 
   const results = useQuery({
-    queryKey: [queryKeyConstants.homePageLists, currentUser === null ? 0 : currentUser.userId],
+    queryKey: [queryKeyConstants.homePageLists, currentUser === null ? 0 : currentUser.id],
     queryFn: fetchHomePageLists,
   });
   const lists = isLoggedIn ? (results?.data ?? []) : [];

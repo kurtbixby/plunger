@@ -66,7 +66,7 @@ function CollectionTableRowExpanded(props) {
             gameStatusEdits: hasStatus ? gameStatusEdits : null
         };
         
-        await APICalls.sendEditCollectionViewRequest(currentUser.userId, collectionEditsRequest);
+        await APICalls.sendEditCollectionViewRequest(currentUser.id, collectionEditsRequest);
     }
 
     return <div className="mb-3 bg-fuchsia-400 pb-2">

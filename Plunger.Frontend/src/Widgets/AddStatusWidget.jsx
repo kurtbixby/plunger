@@ -21,7 +21,7 @@ function AddStatusWidget(props) {
 
     const mutation = useMutation({
         mutationFn: (createRequest) => {
-            return createGameStatus(currentUser.userId, createRequest);
+            return createGameStatus(currentUser.id, createRequest);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: [queryKeyConstants.homePageLists]});
@@ -31,7 +31,7 @@ function AddStatusWidget(props) {
     async function saveChanges(event) {
         event.preventDefault();
         
-        const request = { gameid: game.id, timestamp: new Date(Date.now()).toISOString(), completed: +playState === Enums.PlayStates.Completed, playstate: +playState, timeplayed: currentHours }
+        const request = { gameid: game.id, completed: +playState === Enums.PlayStates.Completed, playstate: +playState, timeplayed: currentHours }
         console.log(request);
         
         await mutation.mutateAsync(request);

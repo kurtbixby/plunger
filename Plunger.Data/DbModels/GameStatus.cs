@@ -11,6 +11,7 @@ public class GameStatus
     public List<PlayStateChange> PlayStateChanges { get; set; }
     public TimeSpan TimePlayed { get; set; }
     public DateTimeOffset? TimeStarted { get; set; }
+    public Guid VersionId { get; set; }
     
     public int UserId { get; set; }
     [JsonIgnore]

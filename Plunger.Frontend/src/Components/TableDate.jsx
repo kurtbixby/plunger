@@ -16,7 +16,7 @@ function TableDate(props) {
     
     return !isEditable ? <div>
         <p>{name}</p>
-        <p>{dateFormat(value)}</p>
+        {value ? <p>{dateFormat(value)}</p> : <p>N/A</p>}
     </div> : <div>
         <label className="block" htmlFor={name.toLowerCase()}>{name}</label>
         <input

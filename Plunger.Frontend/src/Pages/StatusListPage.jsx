@@ -12,7 +12,7 @@ function StatusListPage() {
         queryFn: fetchGameStatuses
     });
 
-    const statusResults = results?.data?.games ?? [];
+    const statusResults = results?.data ?? [];
     
     return <section>
         <div>

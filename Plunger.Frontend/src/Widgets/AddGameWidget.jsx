@@ -68,7 +68,7 @@ function AddGameWidget() {
     
     console.log(formState);
     console.log(addGameRequest);
-    await APICalls.sendAddGameRequest(currentUser.userId, addGameRequest);
+    await APICalls.sendAddGameRequest(currentUser.id, addGameRequest);
   }
   
   function validateFormInputs() {
