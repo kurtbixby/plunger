@@ -31,7 +31,8 @@ public static class ListFetching
                     Completed = gs.Completed,
                     PlayState = gs.PlayState,
                     TimePlayed = gs.TimePlayed,
-                    DateStarted = gs.TimeStarted
+                    DateStarted = gs.TimeStarted,
+                    VersionId = gs.VersionId
                 }
             });
         
@@ -107,7 +108,8 @@ public static class ListFetching
                 Completed = gs.Completed,
                 PlayState = gs.PlayState,
                 TimePlayed = gs.TimePlayed,
-                DateStarted = gs.TimeStarted
+                DateStarted = gs.TimeStarted,
+                VersionId = gs.VersionId
             }
         }).ToDictionary(gs => gs.GameId, gs => gs.GameStatus);
 
@@ -149,7 +151,8 @@ public static class ListFetching
                     Completed = gs.Completed,
                     PlayState = gs.PlayState,
                     TimePlayed = gs.TimePlayed,
-                    DateStarted = gs.TimeStarted
+                    DateStarted = gs.TimeStarted,
+                    VersionId = gs.VersionId
                 }
             });
 

@@ -8,4 +8,5 @@ public record GameStatusDto()
     public int PlayState { get; set; }
     public TimeSpan TimePlayed { get; set; }
     public DateTimeOffset? DateStarted { get; set; }
+    public Guid VersionId { get; set; }
 }

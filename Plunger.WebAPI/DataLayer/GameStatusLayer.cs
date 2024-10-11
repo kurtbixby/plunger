@@ -12,25 +12,27 @@ public static class GameStatusLayer
     {
         // var status = await dbContext.GameStatuses.Include(e => e.Game).FirstAsync(e => e.UserId == userId && e.GameId == gameId);
         var status = await dbContext.GameStatuses.Include(gs => gs.Game).FirstAsync(gs => gs.Id == statusEdits.Id);
-        if (statusEdits.TimeStamp < status.UpdatedAt)
+        if (status.VersionId.CompareTo(statusEdits.VersionId) != 0)
         {
             return new DbEditResponse()
             {
                 Success = false,
-                Message = "Time stamp older than current time stamp"
+                Message = "Incorrect Version Id"
             };
         }
 
+        var editTime = Data.Utils.Formatting.GenerateTimeStamp();
         if ((status.PlayState == (int)PlayState.Unplayed || status.PlayState == (int)PlayState.Unspecified) && statusEdits.PlayState == PlayState.InProgress)
         {
-            status.TimeStarted = statusEdits.TimeStamp;
+            status.TimeStarted = editTime;
         }
         status.PlayState = (int)statusEdits.PlayState;
-        status.UpdatedAt = statusEdits.TimeStamp;
+        status.VersionId = Guid.NewGuid();
+        status.UpdatedAt = editTime;
         status.TimePlayed = statusEdits.TimePlayed;
         status.Completed = statusEdits.Completed;
         var newStateChange = new PlayStateChange()
-            { UpdatedAt = statusEdits.TimeStamp, NewState = (int)statusEdits.PlayState, GameStatusId = status.Id, TimePlayed = statusEdits.TimePlayed, Completed = statusEdits.Completed };
+            { UpdatedAt = status.UpdatedAt, NewState = (int)statusEdits.PlayState, GameStatusId = status.Id, TimePlayed = statusEdits.TimePlayed, Completed = statusEdits.Completed };
         await dbContext.PlayStateChanges.AddAsync(newStateChange);
 
         return new DbEditResponse()

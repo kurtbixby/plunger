@@ -9,6 +9,7 @@ public record GameStatusResponse()
     public TimeSpan TimePlayed { get; set; }
     public DateTimeOffset? TimeStarted { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
+    public Guid VersionId { get; set; }
     
     public string Name { get; set; }
     public string ShortName { get; set; }

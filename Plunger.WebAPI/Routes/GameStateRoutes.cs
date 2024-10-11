@@ -25,7 +25,7 @@ public static class GameStateRoutes
     private static IQueryable GetGameState([FromServices] PlungerDbContext dbContext, [FromRoute] int userId,
         [FromRoute] int gameId)
     {
-        return dbContext.GameStatuses.Where(e => e.UserId == userId && e.GameId == gameId).OrderByDescending(e => e.UpdatedAt).Select(e => new {Id = e.Id, GameId = e.GameId, UserId = e.UserId, Completed = e.Completed, PlayState = e.PlayState, UpdatedAt = e.UpdatedAt, PlayStateChanges = e.PlayStateChanges});
+        return dbContext.GameStatuses.Where(e => e.UserId == userId && e.GameId == gameId).OrderByDescending(e => e.UpdatedAt).Select(e => new {Id = e.Id, GameId = e.GameId, UserId = e.UserId, Completed = e.Completed, PlayState = e.PlayState, UpdatedAt = e.UpdatedAt, PlayStateChanges = e.PlayStateChanges, VersionId = e.VersionId});
     }
 
     private static async Task<IResult> CreateGameState([FromServices] PlungerDbContext dbContext,
@@ -61,10 +61,12 @@ public static class GameStateRoutes
             return Results.BadRequest();
         }
 
+        var editTime = Data.Utils.Formatting.GenerateTimeStamp();
+
         var timePlayed = createGameReq.TimePlayed ?? TimeSpan.Zero; 
-        var timeStarted = createGameReq.PlayState == PlayState.InProgress ? createGameReq.TimeStamp : (DateTimeOffset?)null;
-        var status = new GameStatus() { UserId = userId,  GameId = gameId, Completed = completed, PlayState = (int)createGameReq.PlayState.Value, UpdatedAt = createGameReq.TimeStamp, TimePlayed = timePlayed, TimeStarted = timeStarted};
-        var stateChange = new PlayStateChange() { UpdatedAt = createGameReq.TimeStamp, NewState = (int)createGameReq.PlayState.Value, GameStatus = status, TimePlayed = timePlayed, Completed = completed };
+        var timeStarted = createGameReq.PlayState == PlayState.InProgress ? editTime : (DateTimeOffset?)null;
+        var status = new GameStatus() { UserId = userId,  GameId = gameId, Completed = completed, PlayState = (int)createGameReq.PlayState.Value, UpdatedAt = editTime, TimePlayed = timePlayed, TimeStarted = timeStarted, VersionId = Guid.NewGuid()};
+        var stateChange = new PlayStateChange() { UpdatedAt = status.UpdatedAt, NewState = (int)createGameReq.PlayState.Value, GameStatus = status, TimePlayed = timePlayed, Completed = completed };
         dbContext.GameStatuses.Add(status);
         dbContext.PlayStateChanges.Add(stateChange);
         await dbContext.SaveChangesAsync();
@@ -72,7 +74,7 @@ public static class GameStateRoutes
         return Results.Ok(new GameStatusResponse()
         {
             Id = status.Id, UserId = status.UserId, Completed = status.Completed, PlayState = status.PlayState,
-            UpdatedAt = status.UpdatedAt, Name = status.Game.Name, ShortName = status.Game.ShortName, TimePlayed = status.TimePlayed, TimeStarted = status.TimeStarted
+            UpdatedAt = status.UpdatedAt, Name = status.Game.Name, ShortName = status.Game.ShortName, TimePlayed = status.TimePlayed, TimeStarted = status.TimeStarted, VersionId = status.VersionId
         });
     }
 
@@ -81,14 +83,14 @@ public static class GameStateRoutes
         var userId = db.Users.First(u => string.Equals(u.Username, username)).Id;
         var gameStatuses = db.GameStatuses.Include(gs => gs.Game).ThenInclude(g => g.Cover).Where(gs => gs.UserId == userId).Include(gs => gs.PlayStateChanges).Select(gs => new
         {
-            gs.Id, gs.Completed, gs.PlayState, gs.TimePlayed, gs.TimeStarted, gs.PlayStateChanges,
+            gs.Id, gs.Completed, gs.PlayState, gs.TimePlayed, gs.TimeStarted, gs.PlayStateChanges, gs.VersionId,
             Game = new
             {
                 gs.Game.Id, gs.Game.Name, gs.Game.ShortName, coverUrl = gs.Game.Cover != null ? gs.Game.Cover.Url : null
             },
             CollectionEntries = gs.User.Collection.Games.Where(cg => cg.GameId == gs.GameId).Select(cg => new
             {
-                cg.Id, cg.Physicality, cg.TimeAcquired, cg.TimeAdded, cg.PurchasePrice, Platform = new PlatformDto
+                cg.Id, cg.Physicality, cg.TimeAcquired, cg.TimeAdded, cg.PurchasePrice, cg.VersionId, Platform = new PlatformDto
                 {
                     Id = cg.Platform.Id,
                     Name = cg.Platform.Name,
@@ -110,27 +112,30 @@ public static class GameStateRoutes
         [FromRoute] int userId, [FromRoute] int gameId, [FromBody] UpdateGameStatusRequest updateGameReq)
     {
         var status = await dbContext.GameStatuses.Include(e => e.Game).FirstAsync(e => e.UserId == userId && e.GameId == gameId);
-        if (updateGameReq.TimeStamp < status.UpdatedAt)
+        if (status.VersionId.CompareTo(updateGameReq.VersionId) != 0)
         {
-            return Results.BadRequest(new { Message = "Time stamp older than current time stamp" });
+            return Results.BadRequest(new { Message = "Incorrect Version Id" });
         }
+
+        var editTime = Data.Utils.Formatting.GenerateTimeStamp();
 
         if ((status.PlayState == (int)PlayState.Unplayed || status.PlayState == (int)PlayState.Unspecified) && updateGameReq.PlayState == PlayState.InProgress)
         {
-            status.TimeStarted = updateGameReq.TimeStamp;
+            status.TimeStarted = editTime;
         }
         status.PlayState = (int)updateGameReq.PlayState;
-        status.UpdatedAt = updateGameReq.TimeStamp;
+        status.VersionId = Guid.NewGuid();
+        status.UpdatedAt = editTime;
         status.TimePlayed = updateGameReq.TimePlayed;
         var newStateChange = new PlayStateChange()
-            { UpdatedAt = updateGameReq.TimeStamp, NewState = (int)updateGameReq.PlayState, GameStatusId = status.Id, TimePlayed = updateGameReq.TimePlayed};
+            { UpdatedAt = editTime, NewState = (int)updateGameReq.PlayState, GameStatusId = status.Id, TimePlayed = updateGameReq.TimePlayed};
         await dbContext.PlayStateChanges.AddAsync(newStateChange);
         await dbContext.SaveChangesAsync();
     
         return Results.Ok(new GameStatusResponse()
         {
             Id = status.Id, UserId = status.UserId, Completed = status.Completed, PlayState = status.PlayState, TimePlayed = status.TimePlayed, TimeStarted = status.TimeStarted,
-            UpdatedAt = status.UpdatedAt, Name = status.Game.Name, ShortName = status.Game.ShortName
+            UpdatedAt = status.UpdatedAt, Name = status.Game.Name, ShortName = status.Game.ShortName, VersionId = status.VersionId
         });
     }
 }
