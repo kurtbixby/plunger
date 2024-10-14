@@ -70,7 +70,16 @@ builder.Services.AddCors(options =>
     //     });
 });
 
+builder.Services.AddHttpLogging(options =>
+{
+    options.RequestBodyLogLimit = 4096;
+    options.ResponseBodyLogLimit = 4096;
+});
+
 var app = builder.Build();
+
+app.UseHttpLogging();
+
 app.UseCors("Local");
 app.UseAuthentication();
 app.UseTokenFingerprintMiddleware();
