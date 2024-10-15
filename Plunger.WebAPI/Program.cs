@@ -13,9 +13,13 @@ using Plunger.WebApi.DtoModels;
 using Plunger.WebApi.Middleware;
 using Plunger.WebApi.Routes;
 
+Console.WriteLine("Booting");
 var builder = WebApplication.CreateBuilder(args);
+Console.WriteLine("Getting Connection String");
 var appConnString = builder.Configuration.GetConnectionString("DefaultConnection");
+Console.WriteLine("Adding CbContext");
 builder.Services.AddDbContext<PlungerDbContext>(options => options.UseNpgsql(appConnString));
+Console.WriteLine("Configuring Jwt");
 {
     var jwtConfig = new JwtConfig();
     builder.Configuration.GetSection("Jwt").Bind(jwtConfig);
@@ -26,7 +30,7 @@ builder.Services.AddDbContext<PlungerDbContext>(options => options.UseNpgsql(app
 // builder.Services.AddDbContext<PlungerUserDbContext>(options => options.UseNpgsql(userConnString));
 // builder.Services.AddAuthentication();
 // builder.Services.AddAuthorization();
-
+Console.WriteLine("Adding Auth");
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
