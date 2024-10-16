@@ -1,5 +1,5 @@
 export const queryKeyConstants = {
-    homePageLists: "homePageLists",
-    collectionView: "collectionView",
-    gameStatusView: "gameStatusView",
+  homePageLists: "homePageLists",
+  collectionView: "collectionView",
+  gameStatusView: "gameStatusView",
 };

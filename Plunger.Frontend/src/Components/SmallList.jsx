@@ -2,7 +2,7 @@ import SmallCollectionEntry from "./SmallCollectionEntry.jsx";
 import SmallGameStatus from "./SmallGameStatus.jsx";
 
 function SmallList(props) {
-    const { list } = props;
+  const { list } = props;
   console.log("List", list);
   return (
     <div className="bg-lime-300">
@@ -12,8 +12,10 @@ function SmallList(props) {
         {list.listEntries.map((listEntry) => (
           <div key={listEntry.id} className="listItem">
             {listEntry.game.name}
-            {listEntry.status && <SmallGameStatus game={listEntry}/>}
-            {listEntry.collectionEntries && <SmallCollectionEntry game={listEntry}/>}
+            {listEntry.status && <SmallGameStatus game={listEntry} />}
+            {listEntry.collectionEntries && (
+              <SmallCollectionEntry game={listEntry} />
+            )}
           </div>
         ))}
       </header>

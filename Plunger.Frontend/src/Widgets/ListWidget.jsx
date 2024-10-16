@@ -8,7 +8,9 @@ import GameStatusWidget from "./GameStatusWidget.jsx";
 
 function ListWidget(props) {
   const { list } = props;
-  const { state: { user: currentUser } } = useCurrentUser();
+  const {
+    state: { user: currentUser },
+  } = useCurrentUser();
   const [openedItemId, setOpenedItemId] = useState(NaN);
 
   // const results = useQuery({
@@ -40,8 +42,14 @@ function ListWidget(props) {
             isOpen={listEntry.id === openedItemId}
             toggleItem={toggleItem}
           >
-            {listEntry.status ? <GameStatusWidget game={listEntry}/> : <AddStatusWidget game={listEntry.game}/>}
-            {listEntry.collectionEntries && <SmallCollectionEntry game={listEntry}/>}
+            {listEntry.status ? (
+              <GameStatusWidget game={listEntry} />
+            ) : (
+              <AddStatusWidget game={listEntry.game} />
+            )}
+            {listEntry.collectionEntries && (
+              <SmallCollectionEntry game={listEntry} />
+            )}
           </CollapsibleListItem>
         ))
       )}

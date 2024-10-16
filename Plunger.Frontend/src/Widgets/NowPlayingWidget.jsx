@@ -7,7 +7,9 @@ import { useCurrentUser } from "../CurrentUserProvider.jsx";
 
 function NowPlayingWidget(props) {
   const { list } = props;
-  const { state: { user: currentUser } } = useCurrentUser();
+  const {
+    state: { user: currentUser },
+  } = useCurrentUser();
   const [openedItemId, setOpenedItemId] = useState(NaN);
 
   // const results = useQuery({

@@ -1,4 +1,4 @@
-import APICalls from '../APICalls.js';
+import APICalls from "../APICalls.js";
 
 async function fetchHomePageLists() {
   return await APICalls.sendGetHomePageLists();
