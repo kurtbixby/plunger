@@ -1,5 +1,6 @@
-using Microsoft.EntityFrameworkCore;
-using Plunger.Data.DbModels;
+using Platform = Plunger.Data.DbModels.Platform;
+using Region = Plunger.Common.Enums.Region;
+using ReleaseDate = Plunger.Data.DbModels.ReleaseDate;
 
 namespace Plunger.Data.Utils;
 
@@ -9,12 +10,17 @@ public static class GameExtensions
     {
         try
         {
-            var releaseDates = (game.ReleaseDates != null) ? game.ReleaseDates.Select(apiDate => apiDate.ToDbModel()) : new List<ReleaseDate>();
+            // rd.Status == 5 is "Cancelled"
+            var releaseDates = (game.ReleaseDates != null) ? game.ReleaseDates.Where(rd => rd.Status != 5).Select(apiDate => apiDate.ToDbModel()) : new List<ReleaseDate>();
             var platforms = (game.Platforms != null) ? dbContext.Platforms.Where(e => game.Platforms.Contains(e.Id)) : new List<Platform>().AsQueryable();
+            var gameRatings = (game.AgeRatings != null)
+                ? game.AgeRatings.Select(ar => (int)RegionUtils.RegionForRatingBoard(ar.RatingCategory))
+                : new List<int>();
+            var regions = dbContext.Regions.Where(r => gameRatings.Contains(r.Id));
             return new Data.DbModels.Game
             {
                 Id = game.Id, Name = game.Name, ShortName = game.ShortName, FirstReleased = game.FirstReleased,
-                Platforms = platforms.ToList(), ReleaseDates = releaseDates.ToList(), UpdatedAt = game.UpdatedAt,
+                Platforms = platforms.ToList(), ReleaseDates = releaseDates.ToList(), Regions = regions.ToList(), UpdatedAt = game.UpdatedAt,
                 Checksum = game.Checksum
             };
         }
@@ -47,8 +53,8 @@ public static class CoverExtensions
 
 public static class DateFormatExtensions
 {
-    public static Enums.DateFormat ToCommonEnum(this Data.IgdbAPIModels.DateFormat format) =>
-        Data.IgdbAPIModels.DateFormat.TryParse(format.ToString(), out Enums.DateFormat eFormat) ? eFormat : Enums.DateFormat.TBD;
+    public static Common.Enums.DateFormat ToCommonEnum(this Data.IgdbAPIModels.DateFormat format) =>
+        Enum.TryParse(format.ToString(), out Common.Enums.DateFormat eFormat) ? eFormat : Common.Enums.DateFormat.TBD;
 }
 
 public static class PlatformExtensions
@@ -58,14 +64,14 @@ public static class PlatformExtensions
 
 public static class RegionNameExtensions
 {
-    public static Enums.RegionName ToCommonEnum(this Data.IgdbAPIModels.RegionName region)
+    public static Region ToCommonEnum(this Data.IgdbAPIModels.RegionName region)
     {
-        var isDefined = Enum.IsDefined(typeof(Enums.RegionName), (int)region);
-        return isDefined ? (Enums.RegionName)region : Enums.RegionName.Unknown;
+        var isDefined = Enum.IsDefined(typeof(Region), (int)region);
+        return isDefined ? RegionUtils.RegionForRegionName(region) : Region.Unknown;
     }
 }
 
 public static class ReleaseDateExtensions
 {
-    public static Data.DbModels.ReleaseDate ToDbModel(this Data.IgdbAPIModels.ReleaseDate releaseDate) => new Data.DbModels.ReleaseDate {Id = releaseDate.Id, Date = releaseDate.Date, DateFormat = releaseDate.DateFormat.ToCommonEnum(), PlatformId = releaseDate.PlatformId, RegionName = releaseDate.RegionName.ToCommonEnum(), UpdatedAt = releaseDate.UpdatedAt, Checksum = releaseDate.Checksum};
+    public static Data.DbModels.ReleaseDate ToDbModel(this Data.IgdbAPIModels.ReleaseDate releaseDate) => new Data.DbModels.ReleaseDate {Id = releaseDate.Id, Date = releaseDate.Date, DateFormat = releaseDate.DateFormat.ToCommonEnum(), PlatformId = releaseDate.PlatformId, Region = releaseDate.RegionName.ToCommonEnum(), UpdatedAt = releaseDate.UpdatedAt, Checksum = releaseDate.Checksum};
 }

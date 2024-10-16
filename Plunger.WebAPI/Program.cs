@@ -13,9 +13,13 @@ using Plunger.WebApi.DtoModels;
 using Plunger.WebApi.Middleware;
 using Plunger.WebApi.Routes;
 
+Console.WriteLine("Booting");
 var builder = WebApplication.CreateBuilder(args);
+Console.WriteLine("Getting Connection String");
 var appConnString = builder.Configuration.GetConnectionString("DefaultConnection");
+Console.WriteLine("Adding CbContext");
 builder.Services.AddDbContext<PlungerDbContext>(options => options.UseNpgsql(appConnString));
+Console.WriteLine("Configuring Jwt");
 {
     var jwtConfig = new JwtConfig();
     builder.Configuration.GetSection("Jwt").Bind(jwtConfig);
@@ -26,7 +30,7 @@ builder.Services.AddDbContext<PlungerDbContext>(options => options.UseNpgsql(app
 // builder.Services.AddDbContext<PlungerUserDbContext>(options => options.UseNpgsql(userConnString));
 // builder.Services.AddAuthentication();
 // builder.Services.AddAuthorization();
-
+Console.WriteLine("Adding Auth");
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -58,7 +62,7 @@ builder.Services.AddCors(options =>
         {
             // policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
             // policy.SetIsOriginAllowed(origin => new Uri(origin).IsLoopback);
-            policy.WithOrigins("http://localhost:5173").AllowAnyHeader()
+            policy.WithOrigins("http://localhost:5173", "https://localhost:5173", "http://localhost", "https://localhost").AllowAnyHeader()
                 .AllowAnyMethod().AllowCredentials();
         });
     // options.AddDefaultPolicy(
@@ -70,7 +74,16 @@ builder.Services.AddCors(options =>
     //     });
 });
 
+builder.Services.AddHttpLogging(options =>
+{
+    options.RequestBodyLogLimit = 4096;
+    options.ResponseBodyLogLimit = 4096;
+});
+
 var app = builder.Build();
+
+app.UseHttpLogging();
+
 app.UseCors("Local");
 app.UseAuthentication();
 app.UseTokenFingerprintMiddleware();
@@ -86,9 +99,11 @@ app.MapGet("/games/{gameid}", async ([FromRoute] int gameId, [FromServices] Plun
 #warning TODO: Add pagination to results
 app.MapGet("/users/{userid}/lists", async ([FromRoute] int userId, [FromServices] PlungerDbContext db) => await db.GameLists.Where(gl => gl.UserId == userId).ToListAsync());
 
-app.MapGroup("/").MapCollectionRoutes();
-app.MapGroup("/").MapListRoutes();
-app.MapGroup("/").MapGameStateRoutes();
-app.MapGroup("/").MapUsersRoutes();
+app.MapGroup("/api").MapGameRoutes();
+app.MapGroup("/api").MapInfoRoutes();
+app.MapGroup("/api").MapCollectionRoutes();
+app.MapGroup("/api").MapListRoutes();
+app.MapGroup("/api").MapGameStateRoutes();
+app.MapGroup("/api").MapUsersRoutes();
 
 app.Run();

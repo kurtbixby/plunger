@@ -1,0 +1,13 @@
+{
+  "configurations": {
+    "plunger.frontend": {
+      "appLocation": ".",
+      "outputLocation": "dist",
+      "appBuildCommand": "npm run build",
+      "run": "npm run dev",
+      "appDevserverUrl": "https://localhost:5173",
+      "appName": "plunger-dev-fe",
+      "resourceGroup": "plunger"
+    }
+  }
+}

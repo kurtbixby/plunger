@@ -1,3 +1,5 @@
+import { objIsEmpty } from "./Utils.js";
+
 async function makePostRequest(url, payload, extHeaders = {}){
     return await makeRequest("POST", url, payload, extHeaders);
 }
@@ -13,6 +15,7 @@ async function makeDeleteRequest(url, extHeaders = {}){
 async function makeRequest(method, url, payload, extHeaders = {}) {
     let fetchOptions = {
         method: method,
+        credentials: "include",
         headers: {
             "Content-Type": "application/json",
             ...extHeaders
@@ -21,8 +24,12 @@ async function makeRequest(method, url, payload, extHeaders = {}) {
     if (!objIsEmpty(payload)) {
         fetchOptions.body = JSON.stringify(payload);
     }
-    let response = await fetch(url, fetchOptions);
+    console.log(url);
+    const response = await fetch(url, fetchOptions);
+    if (!response.ok) {
+        throw new Error(response.status);
+    }
     return await response.json();
 }
 
-export {makePostRequest, makePatchRequest, makeDeleteRequest}
+export { makePostRequest, makePatchRequest, makeDeleteRequest, makeRequest }

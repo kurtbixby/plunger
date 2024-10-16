@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using Plunger.Data.DbModels;
+using Plunger.WebApi.DtoModels;
 
 namespace Plunger.WebApi;
 
@@ -22,6 +23,7 @@ public class TokenUtils
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                new Claim(JwtRegisteredClaimNames.Name, user.Username),
                 new Claim(JwtRegisteredClaimNames.Jti,
                     Guid.NewGuid().ToString()),
                 // new Claim(Constants.UserId, user.Id.ToString()),
@@ -45,6 +47,13 @@ public class TokenUtils
     public static bool VerifyTokenFingerprint(string fingerprintHash, string fingerprint)
     {
         return string.Equals(HashBase64UrlString(fingerprint), fingerprintHash);
+    }
+
+    public static UserDetails GetUserDetailsFromClaims(HttpContext httpContext)
+    {
+        var userId = httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+        var userName = httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Name);
+        return new UserDetails() { UserId = userId ?? "", UserName = userName ?? "" };
     }
 
     private static string GenerateRandomBase64UrlString()

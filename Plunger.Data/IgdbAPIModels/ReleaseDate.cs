@@ -1,5 +1,4 @@
 using System.Text.Json.Serialization;
-using Plunger.Data.Enums;
 
 namespace Plunger.Data.IgdbAPIModels;
 
@@ -18,6 +17,9 @@ public record ReleaseDate
     
     [JsonPropertyName("region")]
     public RegionName RegionName { get; init; }
+    
+    [JsonPropertyName("status")]
+    public int Status { get; init; }
     
     [JsonPropertyName("updated_at")]
     [JsonConverter(typeof(Utils.DateTimeOffsetUnixJsonConverter))]

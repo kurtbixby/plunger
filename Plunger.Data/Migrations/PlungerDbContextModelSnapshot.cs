@@ -37,6 +37,21 @@ namespace Plunger.Data.Migrations
                     b.ToTable("GamePlatform");
                 });
 
+            modelBuilder.Entity("GameRegion", b =>
+                {
+                    b.Property<int>("GameId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RegionsId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("GameId", "RegionsId");
+
+                    b.HasIndex("RegionsId");
+
+                    b.ToTable("GameRegion");
+                });
+
             modelBuilder.Entity("Plunger.Data.DbModels.Collection", b =>
                 {
                     b.Property<int>("Id")
@@ -76,8 +91,8 @@ namespace Plunger.Data.Migrations
                     b.Property<int>("PlatformId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("Region")
-                        .HasColumnType("integer");
+                    b.Property<decimal?>("PurchasePrice")
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<int>("RegionId")
                         .HasColumnType("integer");
@@ -239,11 +254,20 @@ namespace Plunger.Data.Migrations
                     b.Property<int>("PlayState")
                         .HasColumnType("integer");
 
+                    b.Property<TimeSpan>("TimePlayed")
+                        .HasColumnType("interval");
+
+                    b.Property<DateTimeOffset?>("TimeStarted")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("UserId")
                         .HasColumnType("integer");
+
+                    b.Property<Guid>("VersionId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -295,11 +319,17 @@ namespace Plunger.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("Completed")
+                        .HasColumnType("boolean");
+
                     b.Property<int>("GameStatusId")
                         .HasColumnType("integer");
 
                     b.Property<int>("NewState")
                         .HasColumnType("integer");
+
+                    b.Property<TimeSpan>("TimePlayed")
+                        .HasColumnType("interval");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -351,7 +381,7 @@ namespace Plunger.Data.Migrations
                     b.Property<int>("PlatformId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("RegionName")
+                    b.Property<int>("Region")
                         .HasColumnType("integer");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
@@ -406,6 +436,21 @@ namespace Plunger.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("GameRegion", b =>
+                {
+                    b.HasOne("Plunger.Data.DbModels.Game", null)
+                        .WithMany()
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Plunger.Data.DbModels.Region", null)
+                        .WithMany()
+                        .HasForeignKey("RegionsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Plunger.Data.DbModels.Collection", b =>
                 {
                     b.HasOne("Plunger.Data.DbModels.User", "User")
@@ -420,7 +465,7 @@ namespace Plunger.Data.Migrations
             modelBuilder.Entity("Plunger.Data.DbModels.CollectionGame", b =>
                 {
                     b.HasOne("Plunger.Data.DbModels.Collection", "Collection")
-                        .WithMany()
+                        .WithMany("Games")
                         .HasForeignKey("CollectionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -528,6 +573,11 @@ namespace Plunger.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Platform");
+                });
+
+            modelBuilder.Entity("Plunger.Data.DbModels.Collection", b =>
+                {
+                    b.Navigation("Games");
                 });
 
             modelBuilder.Entity("Plunger.Data.DbModels.Game", b =>

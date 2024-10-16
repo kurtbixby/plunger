@@ -11,6 +11,7 @@ public class Game
     public List<Platform> Platforms { get; set; }
     public List<ReleaseDate> ReleaseDates { get; set; }
     public Cover? Cover { get; set; }
+    public List<Region> Regions { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
     public Guid Checksum { get; set; }
 }
