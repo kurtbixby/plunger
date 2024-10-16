@@ -1,9 +1,7 @@
 import { makeRequest as makeBaseRequest } from "./Requests";
 
 let accessToken = "";
-const baseAddress = "https://localhost";
-const port = "7004";
-const combinedBaseUrl = baseAddress.concat(":", port);
+const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
 function updateToken(newToken) {
   accessToken = newToken;
@@ -36,7 +34,7 @@ async function makeDeleteRequest(url, extHeaders = {}, withAuth = true) {
 
 async function makeRequest(
   method,
-  url,
+  path,
   payload,
   extHeaders = {},
   withAuth = true,
@@ -47,7 +45,7 @@ async function makeRequest(
   }
   return await makeBaseRequest(
     method,
-    combinedBaseUrl + url,
+      baseUrl + path,
     payload,
     extHeaders,
   );

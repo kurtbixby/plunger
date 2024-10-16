@@ -12,7 +12,7 @@ Exports functions for each call
 async function sendLoginRequest({ identity, password }) {
   let loginRequest = { identity, password };
   let response = await UserRequestsWrapper.makePostRequest(
-    "/api/users/login",
+    "/users/login",
     loginRequest,
     {},
     false,
@@ -26,7 +26,7 @@ async function sendLoginRequest({ identity, password }) {
 async function sendTokenLoginRequest(token) {
   try {
     UserRequestsWrapper.updateToken(token);
-    return await UserRequestsWrapper.makeGetRequest("/api/users/tokenLogin");
+    return await UserRequestsWrapper.makeGetRequest("/users/tokenLogin");
   } catch (error) {
     UserRequestsWrapper.clearToken();
     throw error;
@@ -35,53 +35,53 @@ async function sendTokenLoginRequest(token) {
 
 async function sendNewUserRequest(newUserRequest) {
   return await UserRequestsWrapper.makePostRequest(
-    "/api/users",
+    "/users",
     newUserRequest,
   );
 }
 
 async function sendAddGameRequest(userId, addGameRequest) {
   return await UserRequestsWrapper.makePostRequest(
-    `/api/users/${userId}/collection`,
+    `/users/${userId}/collection`,
     addGameRequest,
   );
 }
 
 async function sendEditGameRequest(userId, itemId, editGameRequest) {
   return await UserRequestsWrapper.makePatchRequest(
-    `/api/users/${userId}/collection/${itemId}`,
+    `/users/${userId}/collection/${itemId}`,
     editGameRequest,
   );
 }
 
 async function sendDeleteGameRequest(userId, itemId) {
   return await UserRequestsWrapper.makeDeleteRequest(
-    `/api/users/${userId}/collection/${itemId}`,
+    `/users/${userId}/collection/${itemId}`,
   );
 }
 
 async function sendCreateListRequest(createListRequest) {
   return await UserRequestsWrapper.makePostRequest(
-    "/api/lists",
+    "/lists",
     createListRequest,
   );
 }
 
 async function sendEditListRequest(listId, editListRequest) {
   return await UserRequestsWrapper.makePatchRequest(
-    `/api/lists/${listId}`,
+    `/lists/${listId}`,
     editListRequest,
   );
 }
 
 // Delete List is unimplemented on the backend
 async function sendDeleteListRequest(listId, editListRequest) {
-  return await UserRequestsWrapper.makeDeleteRequest(`/api/lists/${listId}`);
+  return await UserRequestsWrapper.makeDeleteRequest(`/lists/${listId}`);
 }
 
 async function sendAddGameStatusRequest(userId, addGameStatusRequest) {
   return await UserRequestsWrapper.makePostRequest(
-    `/api/users/${userId}/games`,
+    `/users/${userId}/games`,
     addGameStatusRequest,
   );
 }
@@ -92,7 +92,7 @@ async function sendEditGameStatusRequest(
   editGameStatusRequest,
 ) {
   return await UserRequestsWrapper.makePatchRequest(
-    `/api/users/${userId}/games/${gameId}`,
+    `/users/${userId}/games/${gameId}`,
     editGameStatusRequest,
   );
 }
@@ -100,7 +100,7 @@ async function sendEditGameStatusRequest(
 // Delete GameStatus is unimplemented on the backend
 async function sendDeleteGameStatusRequest(userId, gameId) {
   return await UserRequestsWrapper.makeDeleteRequest(
-    `/api/users/${userId}/games/${gameId}`,
+    `/users/${userId}/games/${gameId}`,
   );
 }
 
@@ -109,35 +109,35 @@ async function sendEditCollectionViewRequest(
   editCollectionViewRequest,
 ) {
   return await UserRequestsWrapper.makePatchRequest(
-    `/api/users/${userId}/collection`,
+    `/users/${userId}/collection`,
     editCollectionViewRequest,
   );
 }
 
 async function sendGameSearchRequest(gameName) {
   return await UserRequestsWrapper.makeGetRequest(
-    `/api/games?name=${gameName}`,
+    `/games?name=${gameName}`,
   );
 }
 
 async function sendPlatformsRequest() {
-  return await UserRequestsWrapper.makeGetRequest(`/api/info/platforms`);
+  return await UserRequestsWrapper.makeGetRequest(`/info/platforms`);
 }
 
 async function sendGetCollectionRequest(username) {
   return await UserRequestsWrapper.makeGetRequest(
-    `/api/users/${username}/collection`,
+    `/users/${username}/collection`,
   );
 }
 
 async function sendGetGameStatusesRequest(username) {
   return await UserRequestsWrapper.makeGetRequest(
-    `/api/users/${username}/games`,
+    `/users/${username}/games`,
   );
 }
 
 async function sendGetHomePageLists() {
-  return await UserRequestsWrapper.makeGetRequest(`/api/lists/homepage`);
+  return await UserRequestsWrapper.makeGetRequest(`/lists/homepage`);
 }
 
 export default {
