@@ -61,14 +61,17 @@ builder.Services.AddCors(options =>
     //     });
     
     var frontendUrl = builder.Configuration["FrontendURL"] ?? "https://localhost:5173";
+    // options.AddDefaultPolicy(policy =>
+    //     {
+    //         policy.WithOrigins(frontendUrl).AllowAnyHeader()
+    //             .AllowAnyMethod().AllowCredentials();
+    //     });
+    
+    options.AddPolicy("Azure", policy =>
     {
-        options.AddDefaultPolicy(
-            policy =>
-            {
-                policy.WithOrigins(frontendUrl).AllowAnyHeader()
-                    .AllowAnyMethod().AllowCredentials();
-            });
-    }
+        policy.WithOrigins(frontendUrl).AllowAnyHeader()
+            .AllowAnyMethod().AllowCredentials();
+    });
 });
 
 builder.Services.AddHttpLogging(options =>
@@ -81,8 +84,8 @@ var app = builder.Build();
 
 app.UseHttpLogging();
 
-// app.UseCors("Local");
-app.UseCors();
+app.UseCors("Azure");
+// app.UseCors();
 app.UseAuthentication();
 app.UseTokenFingerprintMiddleware();
 app.UseAuthorization();
