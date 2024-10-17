@@ -86,7 +86,7 @@ public static class GameStateRoutes
             gs.Id, gs.Completed, gs.PlayState, gs.TimePlayed, gs.TimeStarted, gs.PlayStateChanges, gs.VersionId,
             Game = new
             {
-                gs.Game.Id, gs.Game.Name, gs.Game.ShortName, coverUrl = gs.Game.Cover != null ? gs.Game.Cover.Url : null
+                gs.Game.Id, gs.Game.Name, gs.Game.ShortName, coverImageId = gs.Game.Cover != null ? gs.Game.Cover.ImageId : null
             },
             CollectionEntries = gs.User.Collection.Games.Where(cg => cg.GameId == gs.GameId).Select(cg => new
             {

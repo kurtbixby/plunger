@@ -53,7 +53,7 @@ public static class CollectionRoutes
                             Id = g.Game.Id,
                             Name = g.Game.Name,
                             ShortName = g.Game.ShortName,
-                            CoverUrl = g.Game.Cover != null ? g.Game.Cover.Url : null,
+                            CoverImageId = g.Game.Cover != null ? g.Game.Cover.ImageId : null,
                             Platforms = g.Game.Platforms.Select(p => new PlatformDto()
                             {
                                 Id = p.Id,

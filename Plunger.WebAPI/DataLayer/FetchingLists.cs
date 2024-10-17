@@ -22,7 +22,7 @@ public static class ListFetching
                     Id = gs.Game.Id,
                     Name = gs.Game.Name,
                     ShortName = gs.Game.ShortName,
-                    CoverUrl = gs.Game.Cover?.Url,
+                    CoverImageId = gs.Game.Cover?.ImageId,
                 },
                 Status = new GameStatusDto()
                 {
@@ -65,7 +65,7 @@ public static class ListFetching
                 Id = cg.GameId,
                 Name = cg.Game.Name,
                 ShortName = cg.Game.ShortName,
-                CoverUrl = cg.Game.Cover?.Url ?? ""
+                CoverImageId = cg.Game.Cover?.ImageId ?? ""
             },
             CollectionEntries =
             [
@@ -142,7 +142,7 @@ public static class ListFetching
                     Id = gs.Game.Id,
                     Name = gs.Game.Name,
                     ShortName = gs.Game.ShortName,
-                    CoverUrl = gs.Game.Cover?.Url ?? ""
+                    CoverImageId = gs.Game.Cover?.ImageId ?? ""
                 },
                 Status = new GameStatusDto()
                 {

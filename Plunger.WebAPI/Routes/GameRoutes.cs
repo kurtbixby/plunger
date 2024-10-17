@@ -24,7 +24,7 @@ public static class GameRoutes
                 g.Id, 
                 g.Name,
                 Platforms = g.Platforms.Select(p => new { p.Id, p.Name, p.AltName }).ToList(),
-                CoverUrl = g.Cover != null ? g.Cover.Url : "",
+                CoverImageId = g.Cover != null ? g.Cover.ImageId : "",
                 Regions = g.ReleaseDates.Select(r => r.Region).Distinct().Select(regionId => new { Id = regionId, Name = regionId.ToString() })
             })
             .Where(g => EF.Functions.ILike(g.Name, $"%{name}%")).Take(20);

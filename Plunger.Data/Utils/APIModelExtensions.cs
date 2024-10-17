@@ -41,7 +41,7 @@ public static class CoverExtensions
             {
                 throw new Exception();
             }
-            return new Data.DbModels.Cover { Id = cover.Id, GameId = cover.Game, ImageId = cover.ImageId, Url = cover.Url, Height = cover.Height, Width = cover.Width, Checksum = cover.Checksum };
+            return new Data.DbModels.Cover { Id = cover.Id, GameId = cover.Game, ImageId = cover.ImageId, Height = cover.Height, Width = cover.Width, Checksum = cover.Checksum };
         }
         catch (Exception e)
         {
