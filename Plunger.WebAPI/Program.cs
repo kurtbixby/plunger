@@ -53,21 +53,22 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("Local",
-        policy =>
-        {
-            // policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
-            // policy.SetIsOriginAllowed(origin => new Uri(origin).IsLoopback);
-            policy.WithOrigins("http://localhost:5173", "https://localhost:5173", "http://localhost", "https://localhost").AllowAnyHeader()
-                .AllowAnyMethod().AllowCredentials();
-        });
-    // options.AddDefaultPolicy(
+    // options.AddPolicy("Local",
     //     policy =>
     //     {
-    //         // policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
-    //         // policy.WithOrigins("http://localhost:5173").AllowAnyHeader()
-    //         //     .AllowAnyMethod().AllowCredentials();
+    //         policy.WithOrigins("http://localhost:5173", "https://localhost:5173", "http://localhost", "https://localhost").AllowAnyHeader()
+    //             .AllowAnyMethod().AllowCredentials();
     //     });
+    
+    var frontendUrl = builder.Configuration["FrontendURL"] ?? "https://localhost:5173";
+    {
+        options.AddDefaultPolicy(
+            policy =>
+            {
+                policy.WithOrigins(frontendUrl).AllowAnyHeader()
+                    .AllowAnyMethod().AllowCredentials();
+            });
+    }
 });
 
 builder.Services.AddHttpLogging(options =>
@@ -80,7 +81,8 @@ var app = builder.Build();
 
 app.UseHttpLogging();
 
-app.UseCors("Local");
+// app.UseCors("Local");
+app.UseCors();
 app.UseAuthentication();
 app.UseTokenFingerprintMiddleware();
 app.UseAuthorization();
