@@ -42,7 +42,7 @@ public class IgdbConnector
 
     public async Task<List<Cover>> GetCovers(QueryOptions queryOptions)
     {
-        var fields = new HashSet<string>() { "*" };
+        var fields = new HashSet<string>() { "id, game, image_id, checksum" };
         queryOptions.AddFields(fields);
         queryOptions.AddWhereOption("game.platforms", "= (23,99,51,33,24,22,307,137,37,4,416,20,159,18,21,131,130,7,8,9,48,167,38,46,165,390,441,166,306,30,78,35,64,29,339,32,84,58,19,87,47,440,5,41,11,12,49,169)");
         queryOptions.AddOtherOption("limit", "500");
