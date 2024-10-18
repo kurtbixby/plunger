@@ -8,7 +8,6 @@ public record Cover
     public int Game { get; init; }
     [JsonPropertyName("image_id")]
     public string ImageId { get; init; }
-    public string Url { get; init; }
     public int Height { get; init; }
     public int Width { get; init; }
     public Guid Checksum { get; init; }

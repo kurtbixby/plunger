@@ -4,6 +4,34 @@ using ReleaseDate = Plunger.Data.DbModels.ReleaseDate;
 
 namespace Plunger.Data.Utils;
 
+public static class CoverGameExtensions
+{
+    public static Data.DbModels.Game ToDbModel(this Data.IgdbAPIModels.CoverGame game, PlungerDbContext dbContext)
+    {
+        try
+        {
+            // rd.Status == 5 is "Cancelled"
+            var releaseDates = (game.ReleaseDates != null) ? game.ReleaseDates.Where(rd => rd.Status != 5).Select(apiDate => apiDate.ToDbModel()) : new List<ReleaseDate>();
+            var platforms = (game.Platforms != null) ? dbContext.Platforms.Where(e => game.Platforms.Contains(e.Id)) : new List<Platform>().AsQueryable();
+            var gameRatings = (game.AgeRatings != null)
+                ? game.AgeRatings.Select(ar => (int)RegionUtils.RegionForRatingBoard(ar.RatingCategory))
+                : new List<int>();
+            var regions = dbContext.Regions.Where(r => gameRatings.Contains(r.Id));
+            var cover = game.Cover.ToDbModel();
+            return new Data.DbModels.Game
+            {
+                Id = game.Id, Name = game.Name, ShortName = game.ShortName, FirstReleased = game.FirstReleased,
+                Platforms = platforms.ToList(), ReleaseDates = releaseDates.ToList(), Regions = regions.ToList(), UpdatedAt = game.UpdatedAt,
+                Cover = cover, Checksum = game.Checksum
+            };
+        }
+        catch (Exception e)
+        {
+            return null;
+        }
+    }
+}
+
 public static class GameExtensions
 {
     public static Data.DbModels.Game ToDbModel(this Data.IgdbAPIModels.Game game, PlungerDbContext dbContext)
@@ -33,7 +61,7 @@ public static class GameExtensions
 
 public static class CoverExtensions
 {
-    public static Data.DbModels.Cover ToDbModel(this Data.IgdbAPIModels.Cover cover, PlungerDbContext dbContext)
+    public static Data.DbModels.Cover ToDbModel(this Data.IgdbAPIModels.Cover cover)
     {
         try
         {

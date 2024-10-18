@@ -34,7 +34,7 @@ namespace Plunger.Data.Migrations
 
                     b.HasIndex("PlatformsId");
 
-                    b.ToTable("GamePlatform");
+                    b.ToTable("GamePlatform", (string)null);
                 });
 
             modelBuilder.Entity("GameRegion", b =>
@@ -49,7 +49,7 @@ namespace Plunger.Data.Migrations
 
                     b.HasIndex("RegionsId");
 
-                    b.ToTable("GameRegion");
+                    b.ToTable("GameRegion", (string)null);
                 });
 
             modelBuilder.Entity("Plunger.Data.DbModels.Collection", b =>
@@ -68,7 +68,7 @@ namespace Plunger.Data.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("Collections");
+                    b.ToTable("Collections", (string)null);
                 });
 
             modelBuilder.Entity("Plunger.Data.DbModels.CollectionGame", b =>
@@ -114,7 +114,7 @@ namespace Plunger.Data.Migrations
 
                     b.HasIndex("PlatformId");
 
-                    b.ToTable("CollectionGames");
+                    b.ToTable("CollectionGames", (string)null);
                 });
 
             modelBuilder.Entity("Plunger.Data.DbModels.Cover", b =>
@@ -146,7 +146,7 @@ namespace Plunger.Data.Migrations
                     b.HasIndex("GameId")
                         .IsUnique();
 
-                    b.ToTable("Covers");
+                    b.ToTable("Covers", (string)null);
                 });
 
             modelBuilder.Entity("Plunger.Data.DbModels.Game", b =>
@@ -176,7 +176,7 @@ namespace Plunger.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Games");
+                    b.ToTable("Games", (string)null);
                 });
 
             modelBuilder.Entity("Plunger.Data.DbModels.GameList", b =>
@@ -204,7 +204,7 @@ namespace Plunger.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("GameLists");
+                    b.ToTable("GameLists", (string)null);
                 });
 
             modelBuilder.Entity("Plunger.Data.DbModels.GameListEntry", b =>
@@ -230,7 +230,7 @@ namespace Plunger.Data.Migrations
 
                     b.HasIndex("GameListId");
 
-                    b.ToTable("GameListEntries");
+                    b.ToTable("GameListEntries", (string)null);
                 });
 
             modelBuilder.Entity("Plunger.Data.DbModels.GameStatus", b =>
@@ -271,7 +271,7 @@ namespace Plunger.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("GameStatuses");
+                    b.ToTable("GameStatuses", (string)null);
                 });
 
             modelBuilder.Entity("Plunger.Data.DbModels.Platform", b =>
@@ -304,7 +304,7 @@ namespace Plunger.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Platforms");
+                    b.ToTable("Platforms", (string)null);
                 });
 
             modelBuilder.Entity("Plunger.Data.DbModels.PlayStateChange", b =>
@@ -334,7 +334,7 @@ namespace Plunger.Data.Migrations
 
                     b.HasIndex("GameStatusId");
 
-                    b.ToTable("PlayStateChanges");
+                    b.ToTable("PlayStateChanges", (string)null);
                 });
 
             modelBuilder.Entity("Plunger.Data.DbModels.Region", b =>
@@ -351,7 +351,7 @@ namespace Plunger.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Regions");
+                    b.ToTable("Regions", (string)null);
                 });
 
             modelBuilder.Entity("Plunger.Data.DbModels.ReleaseDate", b =>
@@ -389,7 +389,7 @@ namespace Plunger.Data.Migrations
 
                     b.HasIndex("PlatformId");
 
-                    b.ToTable("ReleaseDate");
+                    b.ToTable("ReleaseDate", (string)null);
                 });
 
             modelBuilder.Entity("Plunger.Data.DbModels.User", b =>
@@ -414,7 +414,7 @@ namespace Plunger.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("GamePlatform", b =>
