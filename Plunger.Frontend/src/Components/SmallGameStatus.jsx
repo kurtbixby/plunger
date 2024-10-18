@@ -1,4 +1,5 @@
 import GameStatusWidget from "../Widgets/GameStatusWidget.jsx";
+import {createCoverUrl} from "../Utils.js";
 
 function SmallGameStatus(props) {
   const {
@@ -7,7 +8,7 @@ function SmallGameStatus(props) {
 
   return (
     <div className="grid grid-cols-2">
-      <img src={game.coverUrl} alt="" />
+      <img src={createCoverUrl(game.coverImageId)} alt="" />
       <GameStatusWidget game={{ game, status }} />
     </div>
   );

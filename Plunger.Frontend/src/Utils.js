@@ -43,4 +43,8 @@ function formatCurrency(price) {
   return currency(price, { fromCents: true }).format();
 }
 
-export { objIsEmpty, objFromForm, dateFormat, timeFormat, formatCurrency };
+function createCoverUrl(imageId, size = "cover_big") {
+  return `https://images.igdb.com/igdb/image/upload/t_${size}/${imageId}.webp`
+}
+
+export { objIsEmpty, objFromForm, dateFormat, timeFormat, formatCurrency, createCoverUrl };
