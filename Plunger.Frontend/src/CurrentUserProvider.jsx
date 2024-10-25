@@ -24,7 +24,9 @@ function currentUserReducer(state, action) {
         },
       };
     }
-    case "loginFailed" || "logout": {
+    case "loginFailed":
+    case "logout": {
+      TokenManagement.clearToken();
       return {
         ...state,
         isLoading: false,

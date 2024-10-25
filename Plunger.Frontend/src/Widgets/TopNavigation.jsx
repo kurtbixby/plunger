@@ -25,6 +25,9 @@ function TopNavigation() {
             <li>
               <Link to={"/" + user.username + "/gamestates"}>Game States</Link>
             </li>
+            <li>
+                <Link to={"/logout"}>Log Out</Link>
+            </li>
           </ul>
         )}
       </nav>

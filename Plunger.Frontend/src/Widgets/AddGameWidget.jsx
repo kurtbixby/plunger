@@ -231,7 +231,7 @@ function AddGameWidget() {
           <CurrencyInput
             name="price"
             value={formState.price}
-            onChange={changePriceDispatch}
+            onChange={(e) => changePriceDispatch(e.target.value)}
           />
         </div>
         <div>
