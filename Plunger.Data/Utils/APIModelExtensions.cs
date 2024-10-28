@@ -17,7 +17,7 @@ public static class CoverGameExtensions
                 ? game.AgeRatings.Select(ar => (int)RegionUtils.RegionForRatingBoard(ar.RatingCategory))
                 : new List<int>();
             var regions = dbContext.Regions.Where(r => gameRatings.Contains(r.Id));
-            var cover = game.Cover.ToDbModel();
+            var cover = game.Cover?.ToDbModel();
             return new Data.DbModels.Game
             {
                 Id = game.Id, Name = game.Name, ShortName = game.ShortName, FirstReleased = game.FirstReleased,

@@ -21,10 +21,10 @@ public class Program
         var contextOptions = new DbContextOptionsBuilder<PlungerDbContext>().UseNpgsql(connString).Options;
 
         var connector = await CreateIgdbConnector(contextOptions);
-        LoadRegions(contextOptions).Wait();
-        LoadPlatforms(connector, contextOptions).Wait();
+        // LoadRegions(contextOptions).Wait();
+        // LoadPlatforms(connector, contextOptions).Wait();
         //
-        var cutoffTime = new DateTimeOffset(2024, 10, 17, 18, 45, 0, TimeSpan.Zero);
+        var cutoffTime = new DateTimeOffset(2024, 10, 25, 18, 0, 0, TimeSpan.Zero);
         
         LoadGamesFresh(connector, contextOptions, cutoffTime);
         
@@ -84,7 +84,7 @@ public class Program
             Console.WriteLine($"{res} rows inserted");
             offset += gamesRetrieved;
             Console.WriteLine($"New offset is {offset}");
-        } while (gamesRetrieved >= batchSize && totalRetrieved <= 1500);
+        } while (gamesRetrieved >= batchSize);
     }
 
     private static async Task LoadGames(IgdbConnector igdbConnector, DbContextOptions<PlungerDbContext> dbContextOptions, DateTimeOffset cutoffTime, int offset = 0)

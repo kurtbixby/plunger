@@ -24,7 +24,7 @@ public record CoverGame
     [JsonPropertyName("updated_at")]
     [JsonConverter(typeof(Utils.DateTimeOffsetUnixJsonConverter))]
     public DateTimeOffset UpdatedAt { get; init; }
-    public Cover Cover { get; init; }
+    public Cover? Cover { get; init; }
     
     public Guid Checksum { get; init; }
 }
