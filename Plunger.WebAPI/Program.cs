@@ -1,15 +1,10 @@
-using System.Security.Claims;
 using System.Text;
-using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using Plunger.Common;
 using Plunger.Data;
-using Plunger.Data.DbModels;
 using Plunger.WebApi;
-using Plunger.WebApi.DtoModels;
 using Plunger.WebApi.Middleware;
 using Plunger.WebApi.Routes;
 
@@ -72,6 +67,12 @@ builder.Services.AddCors(options =>
         policy.WithOrigins(frontendUrl).AllowAnyHeader()
             .AllowAnyMethod().AllowCredentials();
     });
+});
+
+builder.Services.AddTransient<ILogger>(p =>
+{
+    var loggerFactory = p.GetRequiredService<ILoggerFactory>();
+    return loggerFactory.CreateLogger("SomeLogger");
 });
 
 builder.Services.AddHttpLogging(options =>

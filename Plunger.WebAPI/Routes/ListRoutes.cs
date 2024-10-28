@@ -26,8 +26,9 @@ public static class ListRoutes
         return group;
     }
 
-    private static async Task<IResult> GetHomePageLists(HttpContext httpContext, [FromServices] PlungerDbContext db)
+    private static async Task<IResult> GetHomePageLists(HttpContext httpContext, [FromServices] ILogger logger, [FromServices] PlungerDbContext db)
     {
+        logger.LogDebug("Test");
         var userDetails = TokenUtils.GetUserDetailsFromClaims(httpContext);
         if (userDetails.UserId == "" || userDetails.UserName == "")
         {
