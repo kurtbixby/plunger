@@ -1,12 +1,21 @@
 {
   "configurations": {
-    "plunger.frontend": {
+    "plunger.frontend-ppe": {
       "appLocation": ".",
       "outputLocation": "dist",
       "appBuildCommand": "npm run build",
       "run": "npm run dev",
       "appDevserverUrl": "https://localhost:5173",
       "appName": "plunger-dev-fe",
+      "resourceGroup": "plunger"
+    },
+    "plunger.frontend-prod": {
+      "appLocation": ".",
+      "outputLocation": "dist",
+      "appBuildCommand": "npm run build",
+      "run": "npm run dev",
+      "appDevserverUrl": "https://localhost:5173",
+      "appName": "plunger-prod-fe",
       "resourceGroup": "plunger"
     }
   }
