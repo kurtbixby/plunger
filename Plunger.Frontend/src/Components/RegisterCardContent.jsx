@@ -22,6 +22,10 @@ function RegisterCardContent(props) {
     const {handleBackClick} = props;
 
     const [cardFlowState, setCardFlowState] = useState(0);
+    const [isLoading, setIsLoading] = useState(false);
+    const [buttonSendState, setButtonSendState] = useState(0);
+    
+    const loadingMessages = ["Registering", "Signing In"];
 
     const { dispatch: userDispatch } = useCurrentUser();
 
@@ -30,31 +34,75 @@ function RegisterCardContent(props) {
             handleBackClick();
         } else if (cardFlowState === 1) {
             setCardFlowState(0);
+        } else {
+            setCardFlowState(cardFlowState - 1);
         }
     }
-
-    async function handleRegister(e) {
+    
+    async function handleRegisterFlow(e) {
         e.preventDefault();
         
         const formData = objFromForm(e.target.form);
-        
+
         const formValidity = validateFormInput(formData);
 
         if (!formValidity.isValid) {
-            
             return;
         }
+
+        setButtonSendState(0);
+        const regStatus = await handleRegister(formData);
+        if (regStatus === true) {
+            setButtonSendState(1);
+            await handleLogin(formData);
+        }
+    }
+
+    async function handleRegister(formData) {
+        // Add spinner
+        setIsLoading(true);
+        try {
+            await APICalls.sendNewUserRequest({
+                username: formData.username,
+                email: formData.email,
+                password: formData.password
+            });
+        } catch (error) {
+            // Do stuff with error
+            return false;
+        } finally {
+            setIsLoading(false);
+        }
         
-        await APICalls.sendNewUserRequest({
-            username: formData.username,
-            email: formData.email,
-            password: formData.password
-        });
-        
-        await handleLogin({
-            identity: formData.username,
-            password: formData.password
-        });
+        return true;
+    }
+
+    async function handleLogin(formData) {
+        setIsLoading(true);
+        userDispatch({ type: "sendLoginRequest" });
+        let userDetails = null;
+
+        try {
+            userDetails = await APICalls.sendLoginRequest({
+                identity: formData.username,
+                password: formData.password,
+            });
+        } catch (error) {
+            // Do stuff with error
+            userDispatch({
+                type: "loginFailed",
+            });
+            return;
+        } finally {
+            setIsLoading(false);
+        }
+
+        if (userDetails != null) {
+            userDispatch({
+                type: "loginSucceeded",
+                payload: { username: userDetails.userName, userId: userDetails.userId },
+            });
+        }
     }
     
     function validateFormInput(formData) {
@@ -95,18 +143,6 @@ function RegisterCardContent(props) {
         
         return validationResult;
     }
-    
-    async function handleLogin(formData) {
-        userDispatch({ type: "sendLoginRequest" });
-        const userDetails = await APICalls.sendLoginRequest({
-            identity: formData.identity,
-            password: formData.password,
-        });
-        userDispatch({
-            type: "loginSucceeded",
-            payload: { username: userDetails.userName, userId: userDetails.userId },
-        });
-    }
 
     return <>
         <CardHeader>
@@ -145,7 +181,7 @@ function RegisterCardContent(props) {
                             <FormLabel>Confirm Password</FormLabel>
                             <Input name="confirmPassword" type="password" placeholder="hunter2" size="lg"/>
                         </FormControl>
-                        <Button onClick={handleRegister} w="100%">Register</Button>
+                        <Button isLoading={!!isLoading} loadingText={loadingMessages[buttonSendState]} onClick={handleRegisterFlow} w="100%">Register</Button>
                     </Flex>
                 </form>
             </Center>

@@ -22,6 +22,7 @@ function SignInCardContent(props) {
     const {handleBackClick} = props;
     
     const [cardState, setCardState] = useState(0);
+    const [isLoading, setIsLoading] = useState(false);
 
     const { dispatch: userDispatch } = useCurrentUser();
     
@@ -46,14 +47,27 @@ function SignInCardContent(props) {
         }
         
         userDispatch({ type: "sendLoginRequest" });
-        const userDetails = await APICalls.sendLoginRequest({
-            identity: formData.username,
-            password: formData.password,
-        });
-        userDispatch({
-            type: "loginSucceeded",
-            payload: { username: userDetails.userName, userId: userDetails.userId },
-        });
+        setIsLoading(true);
+        let userDetails = null;
+        try {
+            userDetails = await APICalls.sendLoginRequest({
+                identity: formData.username,
+                password: formData.password,
+            });
+        } catch (error) {
+            userDispatch({
+                type: "loginFailed",
+            });
+            // Update UI
+            // Set error/display error
+        }
+        setIsLoading(false);
+        if (userDetails != null) {
+            userDispatch({
+                type: "loginSucceeded",
+                payload: { username: userDetails.userName, userId: userDetails.userId },
+            });
+        }
     }
     
     function validateFormInput(formData) {
@@ -104,7 +118,7 @@ function SignInCardContent(props) {
                             <FormLabel>Password</FormLabel>
                             <Input name="password" type="password" placeholder="hunter2" size="lg"/>
                         </FormControl>
-                        <Button onClick={handleSignIn} w="100%">Sign In</Button>
+                        <Button isLoading={!!isLoading} loadingText="Signing in..." onClick={handleSignIn} w="100%">Sign In</Button>
                     </Flex>
                 </form>
             </Center>
