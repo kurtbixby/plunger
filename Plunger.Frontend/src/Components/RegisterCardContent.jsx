@@ -52,7 +52,7 @@ function RegisterCardContent(props) {
         });
         
         await handleLogin({
-            email: formData.email,
+            identity: formData.username,
             password: formData.password
         });
     }
@@ -99,7 +99,7 @@ function RegisterCardContent(props) {
     async function handleLogin(formData) {
         userDispatch({ type: "sendLoginRequest" });
         const userDetails = await APICalls.sendLoginRequest({
-            identity: formData.username,
+            identity: formData.identity,
             password: formData.password,
         });
         userDispatch({
