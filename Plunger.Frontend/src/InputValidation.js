@@ -17,6 +17,7 @@ async function isUsernameValid(username) {
 function isEmailValid(email) {
     return true;
     
+    // https://www.oreilly.com/library/view/regular-expressions-cookbook/9781449327453/ch04s01.html
     const validatorRegex = new RegExp("^[A-Z0-9+_.-]+@[A-Z0-9.-]+$");
     const index = email.search(validatorRegex);
     return index === 0;
