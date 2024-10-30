@@ -8,7 +8,7 @@
     "build": "NODE_ENV=development vite build --mode ppe",
     "deploy": "swa deploy --app-name plunger-dev-fe --env production",
     "build-prod": "vite build",
-    "deploy-prod": "swa deploy --app-name plunger-dev --env production",
+    "deploy-prod": "swa deploy --app-name plunger-prod-fe --env production",
     "preview": "vite preview",
     "test": "echo \"Error: no test specified\" && exit 1",
     "format": "prettier --write \"src/**/*.{js,jsx}\"",
