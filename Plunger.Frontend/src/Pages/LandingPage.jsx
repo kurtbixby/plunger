@@ -26,7 +26,6 @@ function LandingPage() {
     }
     
     return isLoggedIn === true ? <UserHomePage /> : <div>
-            <p>Not Logged In</p>
             <Container minW="60%" centerContent>
                 <Card w="md">
                     {loginCardState === 0 && <WelcomeCardContent handleSignInClick={handleSignInClick} handleRegisterClick={handleRegisterClick}/>}

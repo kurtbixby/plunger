@@ -9,6 +9,7 @@ import StatusListPage from "./Pages/StatusListPage.jsx";
 import {ChakraProvider} from "@chakra-ui/react";
 import LandingPage from "./Pages/LandingPage.jsx";
 import LogoutPage from "./Pages/LogoutPage.jsx";
+import NavBar from "./Widgets/NavBar.jsx";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -25,7 +26,7 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <CurrentUserProvider>
           <ChakraProvider>
-            <TopNavigation />
+            <NavBar title="Plunger" />
             <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/:userName" element={<ProfilePage />} />
