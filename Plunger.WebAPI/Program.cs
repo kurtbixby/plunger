@@ -17,11 +17,6 @@ builder.Services.AddDbContext<PlungerDbContext>(options => options.UseNpgsql(app
     builder.Services.AddSingleton(jwtConfig);
 }
 
-// var userConnString = builder.Configuration.GetConnectionString("UserDefaultConnection");
-// builder.Services.AddDbContext<PlungerUserDbContext>(options => options.UseNpgsql(userConnString));
-// builder.Services.AddAuthentication();
-// builder.Services.AddAuthorization();
-
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -48,19 +43,7 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddCors(options =>
 {
-    // options.AddPolicy("Local",
-    //     policy =>
-    //     {
-    //         policy.WithOrigins("http://localhost:5173", "https://localhost:5173", "http://localhost", "https://localhost").AllowAnyHeader()
-    //             .AllowAnyMethod().AllowCredentials();
-    //     });
-    
     var frontendUrl = builder.Configuration["FrontendURL"] ?? "https://localhost:5173";
-    // options.AddDefaultPolicy(policy =>
-    //     {
-    //         policy.WithOrigins(frontendUrl).AllowAnyHeader()
-    //             .AllowAnyMethod().AllowCredentials();
-    //     });
     
     options.AddPolicy("Azure", policy =>
     {
